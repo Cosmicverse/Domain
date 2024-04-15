@@ -112,7 +112,7 @@ function createValue<V extends Value<ValueTypeFor<V>>>(target: V, value: ValueTy
 
       return vo
     }
-    catch(error) {
+    catch (error) {
       if (error instanceof ValueError) {
         handler.error?.(error)
       }

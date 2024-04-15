@@ -81,7 +81,7 @@ describe('Value', () => {
       createVersionValue(0)
       expect(true).toBeFalsy()
     }
-    catch(error) {
+    catch (error) {
       if (error instanceof ValueError) {
         expect(error.name, 'ValueError')
         expect(error.message, 'value is invalid')
@@ -97,7 +97,7 @@ describe('Value', () => {
       createEmail('123')
       expect(true).toBeFalsy()
     }
-    catch(error) {
+    catch (error) {
       if (error instanceof ValidationError) {
         expect(error.name, 'ValidationError')
         expect(error.message, 'email is invalid')

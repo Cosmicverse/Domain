@@ -120,7 +120,7 @@ function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> =
         return entity
       }
     }
-    catch(error) {
+    catch (error) {
       if (error instanceof ValueError) {
         handler.error?.(error)
       }

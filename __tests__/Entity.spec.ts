@@ -100,7 +100,7 @@ describe('Entity', () => {
       e1.name = ''
       expect(true).toBeFalsy()
     }
-    catch(error) {
+    catch (error) {
       if (error instanceof ValueError) {
         expect(error.name).toBe('ValueError')
         expect(error.message).toBe('name is invalid')
