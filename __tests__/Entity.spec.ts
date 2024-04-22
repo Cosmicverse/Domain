@@ -53,14 +53,17 @@ type User = Entity & {
 const createUser = defineEntity<User>({
   attributes: {
     id: {
+      required: true,
       validator: value => 2 < value.length,
     },
 
     createdAt: {
+      required: true,
       validator: value => guard(value),
     },
 
     name: {
+      required: true,
       validator: value => 2 < value.length,
     },
   },
@@ -131,6 +134,7 @@ describe('Entity', () => {
 
       attributes: {
         id: {
+          required: true,
           validator: (value, entity) => {
             expect(value).toBe(id)
             expect(entity.id).toBe(id)
@@ -139,6 +143,7 @@ describe('Entity', () => {
         },
 
         createdAt: {
+          required: true,
           validator: (value, entity) => {
             expect(value).toBe(createdAt)
             expect(entity.createdAt).toBe(createdAt)
@@ -147,12 +152,12 @@ describe('Entity', () => {
         },
 
         name: {
+          required: true,
           validator: (value, entity) => {
             expect(2 < value.length).toBeTruthy()
             expect(2 < entity.name.length).toBeTruthy()
             return 2 < value.length
           },
-
           updated: (newValue, oldValue, entity) => {
             expect(newValue).toBe('jonathan')
             expect(oldValue).toBe(name)

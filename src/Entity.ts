@@ -52,6 +52,7 @@ export type Entity = object
 export type EntityAttributeKey<K> = keyof K extends string | symbol ? keyof K : never
 
 export type EntityAttributeLifecycle<E extends Entity, V> = {
+  required?: boolean
   validator?(value: V, entity: E): boolean | never
   updated?(newValue: V, oldValue: V, entity: E): void
 }
@@ -104,13 +105,19 @@ function createEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): Pro
 function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {
     try {
-      const { attributes } = handler
-      const entity = new Proxy(target, createEntityHandler(handler))
+      const attributes = handler.attributes
 
       if (guard<EntityAttributeLifecycleMap<E>>(attributes)) {
-        for (const attr in attributes) {
-          if (false === attributes[attr]?.validator?.(target[attr], entity)) {
-            throw new ValueError(`${String(attr)} is invalid`)
+        const entity = new Proxy(target, createEntityHandler(handler))
+
+        for (const key in attributes) {
+          const property = attributes[key] as unknown
+          if (guard(property, 'required') && property.required && !(key in target)) {
+            throw new ValueError(`${JSON.stringify(target)} ${key} is required`)
+          }
+
+          if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
+            throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
           }
         }
 
@@ -121,9 +128,7 @@ function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> =
       }
     }
     catch (error) {
-      if (error instanceof ValueError) {
-        handler.error?.(error)
-      }
+      handler.error?.(error as Error)
 
       throw error
     }

@@ -104,7 +104,7 @@ function createValue<V extends Value<ValueTypeFor<V>>>(target: V, value: ValueTy
       const vo = new Proxy(target, createValueHandler(handler))
 
       if (false === handler.validator?.(value, vo)) {
-        throw new ValueError(`${JSON.stringify(value)} is invalid`)
+        throw new ValueError(`${target.constructor.name} is invalid: ${JSON.stringify(value)}`)
       }
 
       handler.created?.(vo)
@@ -113,9 +113,7 @@ function createValue<V extends Value<ValueTypeFor<V>>>(target: V, value: ValueTy
       return vo
     }
     catch (error) {
-      if (error instanceof ValueError) {
-        handler.error?.(error)
-      }
+      handler.error?.(error as Error)
 
       throw error
     }
