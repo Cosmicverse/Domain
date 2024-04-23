@@ -33,44 +33,47 @@
 import {
   it,
   expect,
+  expectTypeOf,
   describe,
 } from 'vitest'
 
-import { guard } from '@cosmicmind/foundationjs'
+import {
+  guard,
+} from '@cosmicmind/foundationjs'
 
 import {
-  Entity,
   Event,
+  EventError,
   defineEvent,
 } from '@/index'
 
-type User = Entity & {
+type User = Event & {
+  readonly id: string
+  readonly createdAt: Date
   name: string
+  empty?: string
 }
 
-type UserEvent = Event & {
-  id: string
-  createdAt: Date
-  correlationId: string
-  entity: User
-}
-
-const createUserEvent = defineEvent<UserEvent>({
-  attributes: {
+const createUser = defineEvent<User>({
+  properties: {
     id: {
-      validator: (value: string): boolean => 2 < value.length,
-    },
-
-    correlationId: {
-      validator: (value: string): boolean => 2 < value.length,
+      required: true,
+      validator: value => 2 < value.length,
     },
 
     createdAt: {
-      validator: (value: Date): boolean => guard<Date>(value),
+      required: true,
+      validator: value => guard(value),
     },
 
-    entity: {
-      validator: (value: User): boolean => guard<User>(value),
+    name: {
+      required: true,
+      validator: value => 2 < value.length,
+    },
+
+    empty: {
+      required: false,
+      validator: value => guard(value),
     },
   },
 })
@@ -78,72 +81,164 @@ const createUserEvent = defineEvent<UserEvent>({
 describe('Event', () => {
   it('interface', () => {
     const id = '123'
-    const correlationId = '456'
     const createdAt = new Date()
-    const entity = {
-      id,
-      createdAt,
-      name: 'daniel',
-    }
+    const name = 'daniel'
 
-    const e1 = createUserEvent({
+    const e1 = createUser({
       id,
-      correlationId,
       createdAt,
-      entity,
+      name: 'jonathan',
     })
 
+    e1.name = 'daniel'
+
     expect(e1.id).toBe(id)
-    expect(e1.correlationId).toBe(correlationId)
     expect(e1.createdAt).toBe(createdAt)
-    expect(e1.entity).toStrictEqual(entity)
+    expect(e1.name).toBe(name)
+  })
+
+  it('partial validator', () => {
+    const id = '123'
+    const createdAt = new Date()
+    const name = 'daniel'
+
+    const e1 = createUser({
+      id,
+      createdAt,
+      name: 'jonathan',
+    })
+
+    try {
+      e1.name = ''
+      expect(true).toBeFalsy()
+    }
+    catch (error) {
+      if (error instanceof EventError) {
+        expect(error.name).toBe('EventError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
+      }
+      else {
+        expect(true).toBeFalsy()
+      }
+    }
+
+    expect(e1.id).toBe(id)
+    expect(e1.createdAt).toBe(createdAt)
+    expect(name).not.toBe(e1.name)
+  })
+
+  it('partial validator 2', () => {
+    const id = '123'
+    const createdAt = new Date()
+    const name = 'daniel'
+    const empty = 'yay'
+
+    const e1 = createUser({
+      id,
+      createdAt,
+      name: 'jonathan',
+      empty,
+    })
+
+    try {
+      e1.name = ''
+      expect(true).toBeFalsy()
+    }
+    catch (error) {
+      if (error instanceof EventError) {
+        expect(error.name).toBe('EventError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
+      }
+      else {
+        expect(true).toBeFalsy()
+      }
+    }
+
+    expect(e1.id).toBe(id)
+    expect(e1.createdAt).toBe(createdAt)
+    expect(name).not.toBe(e1.name)
+    expect(empty).toBe(e1.empty)
+  })
+
+  it('partial validator 3', () => {
+    const id = '123'
+    const createdAt = new Date()
+    const name = 'daniel'
+    const empty = undefined
+
+    const e1 = createUser({
+      id,
+      createdAt,
+      name: 'jonathan',
+      empty,
+    })
+
+    try {
+      e1.name = ''
+      expect(true).toBeFalsy()
+    }
+    catch (error) {
+      if (error instanceof EventError) {
+        expect(error.name).toBe('EventError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
+      }
+      else {
+        expect(true).toBeFalsy()
+      }
+    }
+
+    expect(e1.id).toBe(id)
+    expect(e1.createdAt).toBe(createdAt)
+    expect(name).not.toBe(e1.name)
+    expect(empty).toBe(undefined)
   })
 
   it('EventLifecycle', () => {
     const id = '123'
-    const correlationId = '456'
     const createdAt = new Date()
-    const entity = {
-      id,
-      createdAt,
-      name: 'daniel',
-    }
+    const name = 'daniel'
 
-    const createEvent = defineEvent<UserEvent>({
-      trace(event: Event) {
-        expect(guard<Event>(event)).toBeTruthy()
+    const createEvent = defineEvent<User>({
+      trace(event) {
+        expect(guard(event)).toBeTruthy()
       },
 
-      created(event: Event) {
-        expect(guard<Event>(event)).toBeTruthy()
+      created(event) {
+        expect(guard(event))
       },
 
-      attributes: {
+      properties: {
         id: {
-          validator: (value: string): boolean => {
+          required: true,
+          validator: (value, event) => {
             expect(value).toBe(id)
-            return 2 < value.length
-          },
-        },
-
-        correlationId: {
-          validator: (value: string): boolean => {
-            expect(value).toBe(correlationId)
+            expect(event.id).toBe(id)
             return 2 < value.length
           },
         },
 
         createdAt: {
-          validator: (value: Date): boolean => {
+          required: true,
+          validator: (value, event) => {
             expect(value).toBe(createdAt)
-            return guard<Date>(value)
+            expect(event.createdAt).toBe(createdAt)
+            return guard(value)
           },
         },
 
-        entity: {
-          validator: (value: User): boolean => {
-            expect(guard<User>(value)).toBeTruthy()
-            return guard<User>(value)
+        name: {
+          required: true,
+          validator: (value, event) => {
+            expect(2 < value.length).toBeTruthy()
+            expect(2 < event.name.length).toBeTruthy()
+            return 2 < value.length
+          },
+          updated: (newValue, oldValue, event) => {
+            expect(newValue).toBe('jonathan')
+            expect(oldValue).toBe(name)
+            expect(event.id).toBe(id)
+            expect(event.createdAt).toBe(createdAt)
+            expect(event.name).toBe(name)
           },
         },
       },
@@ -151,14 +246,15 @@ describe('Event', () => {
 
     const e1 = createEvent({
       id,
-      correlationId,
       createdAt,
-      entity,
+      name,
     })
 
     expect(e1.id).toBe(id)
-    expect(e1.correlationId).toBe(correlationId)
     expect(e1.createdAt).toBe(createdAt)
-    expect(e1.entity).toStrictEqual(entity)
+
+    e1.name = 'jonathan'
+
+    expect('jonathan').toBe(e1.name)
   })
 })

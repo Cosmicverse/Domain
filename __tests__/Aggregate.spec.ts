@@ -79,7 +79,7 @@ type UserRegisterEvent = Event & {
 }
 
 const createUserAggregateRegisterEvent = defineEvent<UserRegisterEvent>({
-  attributes: {
+  properties: {
     entity: {
       validator: (entity: User): boolean => guard<User>(entity),
     },
@@ -146,7 +146,7 @@ describe('Aggregate', () => {
         expect(guard<User>(entity)).toBeTruthy()
       },
 
-      attributes: {
+      properties: {
         id: {
           validator(value: string) {
             expect(value).toBe(id)

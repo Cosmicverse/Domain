@@ -33,6 +33,7 @@
 import {
   it,
   expect,
+  expectTypeOf,
   describe,
 } from 'vitest'
 
@@ -84,7 +85,7 @@ describe('Value', () => {
     catch (error) {
       if (error instanceof ValueError) {
         expect(error.name, 'ValueError')
-        expect(error.message, 'value is invalid')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
       }
       else {
         expect(true).toBeFalsy()
@@ -100,7 +101,7 @@ describe('Value', () => {
     catch (error) {
       if (error instanceof ValidationError) {
         expect(error.name, 'ValidationError')
-        expect(error.message, 'email is invalid')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
       }
       else {
         expect(true).toBeFalsy()

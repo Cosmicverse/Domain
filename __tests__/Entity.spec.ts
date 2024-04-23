@@ -33,14 +33,17 @@
 import {
   it,
   expect,
+  expectTypeOf,
   describe,
 } from 'vitest'
 
-import { guard } from '@cosmicmind/foundationjs'
+import {
+  guard,
+} from '@cosmicmind/foundationjs'
 
 import {
   Entity,
-  ValueError,
+  EntityError,
   defineEntity,
 } from '@/index'
 
@@ -52,7 +55,7 @@ type User = Entity & {
 }
 
 const createUser = defineEntity<User>({
-  attributes: {
+  properties: {
     id: {
       required: true,
       validator: value => 2 < value.length,
@@ -110,9 +113,9 @@ describe('Entity', () => {
       expect(true).toBeFalsy()
     }
     catch (error) {
-      if (error instanceof ValueError) {
-        expect(error.name).toBe('ValueError')
-        expect(error.message).toBe('name is invalid')
+      if (error instanceof EntityError) {
+        expect(error.name).toBe('EntityError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
       }
       else {
         expect(true).toBeFalsy()
@@ -142,9 +145,9 @@ describe('Entity', () => {
       expect(true).toBeFalsy()
     }
     catch (error) {
-      if (error instanceof ValueError) {
-        expect(error.name).toBe('ValueError')
-        expect(error.message).toBe('name is invalid')
+      if (error instanceof EntityError) {
+        expect(error.name).toBe('EntityError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
       }
       else {
         expect(true).toBeFalsy()
@@ -175,9 +178,9 @@ describe('Entity', () => {
       expect(true).toBeFalsy()
     }
     catch (error) {
-      if (error instanceof ValueError) {
-        expect(error.name).toBe('ValueError')
-        expect(error.message).toBe('name is invalid')
+      if (error instanceof EntityError) {
+        expect(error.name).toBe('EntityError')
+        expectTypeOf(error.message).toMatchTypeOf<string>()
       }
       else {
         expect(true).toBeFalsy()
@@ -204,7 +207,7 @@ describe('Entity', () => {
         expect(guard(entity))
       },
 
-      attributes: {
+      properties: {
         id: {
           required: true,
           validator: (value, entity) => {

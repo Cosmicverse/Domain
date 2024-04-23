@@ -39,107 +39,154 @@ import {
   FoundationError,
 } from '@cosmicmind/foundationjs'
 
-import {
-  ValueError,
-} from '@/Value'
-
-export type Entity = object
+/**
+ * Represents an Entity.
+ *
+ * @example
+ * const entity: Entity = {
+ *   name: 'John Doe',
+ *   age: 25
+ * }
+ */
+export type Entity = Record<string, unknown>
 
 /**
- * The `EntityAttributeKey` defines the allowable keys for
- * a given type `K`.
+ * Represents a type that is a valid property key of a given entity type.
+ *
+ * @template K - The entity type.
+ * @typeparam K - A type is a valid property key.
+ *
+ * @returns - A valid property key of the entity type, or `never` if the key is not a valid property key.
  */
-export type EntityAttributeKey<K> = keyof K extends string | symbol ? keyof K : never
+export type EntityPropertyKey<K> = keyof K extends string | symbol ? keyof K : never
 
-export type EntityAttributeLifecycle<E extends Entity, V> = {
+/**
+ * Represents the lifecycle hooks for an entity property.
+ *
+ * @template E - The type of the entity.
+ * @template V - The type of the property value.
+ */
+export type EntityPropertyLifecycle<E extends Entity, V> = {
   required?: boolean
   validator?(value: V, entity: E): boolean | never
   updated?(newValue: V, oldValue: V, entity: E): void
 }
 
 /**
- * The `EntityAttributeLifecycleMap` defined the key-value
- * pairs used in handling attribute events.
+ * Represents a map that defines the lifecycle of entity properties.
+ *
+ * @template E - The type of the entity.
  */
-export type EntityAttributeLifecycleMap<E extends Entity> = {
-  [K in keyof E]?: EntityAttributeLifecycle<E, E[K]>
+export type EntityPropertyLifecycleMap<E extends Entity> = {
+  [K in keyof E]?: EntityPropertyLifecycle<E, E[K]>
 }
 
 export class EntityError extends FoundationError {}
 
+/**
+ * Represents the lifecycle methods for an entity.
+ *
+ * @template E - The type of entity.
+ */
 export type EntityLifecycle<E extends Entity> = {
   created?(entity: E): void
   trace?(entity: E): void
-  error?(error: ValueError): void
-  attributes?: EntityAttributeLifecycleMap<E>
+  error?(error: EntityError): void
+  properties?: EntityPropertyLifecycleMap<E>
 }
 
+/**
+ * Defines an entity with an optional entity lifecycle handler.
+ *
+ * @template E The type of the entity.
+ * @param {EntityLifecycle<E>} [handler={}] The optional entity lifecycle handler.
+ * @returns {(entity: E) => E} A function that creates an entity with the given lifecycle handler.
+ */
 export const defineEntity = <E extends Entity>(handler: EntityLifecycle<E> = {}): (entity: E) => E =>
   (entity: E): E => createEntity(entity, handler)
 
 /**
- * The `createEntityHandler` prepares the `EntityLifecycle` for
- * the given `handler`.
+ * Creates a ProxyHandler for Entity instances with the given EntityLifecycle handler.
+ * The ProxyHandler intercepts property set operations, validates the new value against the associated property validator,
+ * triggers the updated callback for the property, updates the property value, and traces the change if trace is enabled.
+ *
+ * @typeparam E - The type of Entity.
+ * @param handler - The EntityLifecycle handler.
+ * @returns A ProxyHandler for Entity instances.
  */
 function createEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): ProxyHandler<E> {
   return {
-    set<A extends EntityAttributeKey<E>, V extends E[A]>(target: E, attr: A, value: V): boolean | never {
-      const h = handler.attributes?.[attr]
-      if (false === h?.validator?.(value, target)) {
-        throw new ValueError(`${String(attr)} is invalid`)
+    set<A extends EntityPropertyKey<E>, V extends E[A]>(target: E, key: A, value: V): boolean | never {
+      const property = handler.properties?.[key]
+
+      if (false === property?.validator?.(value, target)) {
+        throwErrorAndTrace(`${JSON.stringify(target)} ${JSON.stringify(key)} is invalid`, handler)
       }
 
-      h?.updated?.(value, target[attr], target)
+      property?.updated?.(value, target[key], target)
 
-      const result = Reflect.set(target, attr, value)
+      const result = Reflect.set(target, key, value)
       handler.trace?.(target)
+
       return result
     },
   }
 }
 
 /**
- * The `createEntity` creates a new `Proxy` instance with the
- * given `target` and `handler`.
+ * Throws an EntityError with a specified message and invokes the error handler.
+ *
+ * @template E - The type of Entity.
+ * @param {string} message - The error message.
+ * @param {EntityLifecycle<E>} handler - The entity lifecycle handler.
+ * @throws {EntityError} - The EntityError instance.
+ * @return {never} - This method never returns.
+ */
+function throwErrorAndTrace<E extends Entity>(message: string, handler: EntityLifecycle<E>): never {
+  const error = new EntityError(message)
+  handler.error?.(error)
+  throw error
+}
+
+/**
+ * Creates an entity of type `E`.
+ *
+ * @template E - The type of the entity to create.
+ * @param {E} target - The target object to create the entity from.
+ * @param {EntityLifecycle<E>} [handler={}] - The lifecycle handler for the entity.
+ * @returns {E} - The created entity object.
+ * @throws {EntityError} - If the target object is invalid.
  */
 function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {
-    try {
-      const attributes = handler.attributes
+    const properties = handler.properties
 
-      if (guard<EntityAttributeLifecycleMap<E>>(attributes)) {
-        const entity = new Proxy(target, createEntityHandler(handler))
+    if (guard<EntityPropertyLifecycleMap<E>>(properties)) {
+      const entity = new Proxy(target, createEntityHandler(handler))
 
-        for (const key in attributes) {
-          const property = attributes[key] as unknown
-          if (guard(property, 'required') && property.required) {
-            if (!(key in target)) {
-              throw new ValueError(`${JSON.stringify(target)} ${key} is required`)
-            }
-
-            if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
-              throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
-            }
+      for (const [ key, property ] of Object.entries(properties) as [string, EntityPropertyLifecycle<E, unknown>][]) {
+        if (property.required) {
+          if (!(key in target)) {
+            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is required`, handler)
           }
-          else if (key in target && 'undefined' !== typeof target[key]) {
-            if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
-              throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
-            }
+
+          if (false === property.validator?.(target[key], entity)) {
+            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
           }
         }
-
-        handler.created?.(entity)
-        handler.trace?.(entity)
-
-        return entity
+        else if (key in target && 'undefined' !== typeof target[key]) {
+          if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
+            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
+          }
+        }
       }
-    }
-    catch (error) {
-      handler.error?.(error as Error)
 
-      throw error
+      handler.created?.(entity)
+      handler.trace?.(entity)
+
+      return entity
     }
   }
 
-  throw new EntityError(`${String(target)} is invalid`)
+  throwErrorAndTrace(`${JSON.stringify(target)} is invalid`, handler)
 }
