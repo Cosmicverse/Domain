@@ -48,6 +48,7 @@ type User = Entity & {
   readonly id: string
   readonly createdAt: Date
   name: string
+  empty?: string
 }
 
 const createUser = defineEntity<User>({
@@ -65,6 +66,11 @@ const createUser = defineEntity<User>({
     name: {
       required: true,
       validator: value => 2 < value.length,
+    },
+
+    empty: {
+      required: false,
+      validator: value => guard(value),
     },
   },
 })
@@ -116,6 +122,72 @@ describe('Entity', () => {
     expect(e1.id).toBe(id)
     expect(e1.createdAt).toBe(createdAt)
     expect(name).not.toBe(e1.name)
+  })
+
+  it('partial validator 2', () => {
+    const id = '123'
+    const createdAt = new Date()
+    const name = 'daniel'
+    const empty = 'yay'
+
+    const e1 = createUser({
+      id,
+      createdAt,
+      name: 'jonathan',
+      empty,
+    })
+
+    try {
+      e1.name = ''
+      expect(true).toBeFalsy()
+    }
+    catch (error) {
+      if (error instanceof ValueError) {
+        expect(error.name).toBe('ValueError')
+        expect(error.message).toBe('name is invalid')
+      }
+      else {
+        expect(true).toBeFalsy()
+      }
+    }
+
+    expect(e1.id).toBe(id)
+    expect(e1.createdAt).toBe(createdAt)
+    expect(name).not.toBe(e1.name)
+    expect(empty).toBe(e1.empty)
+  })
+
+  it('partial validator 3', () => {
+    const id = '123'
+    const createdAt = new Date()
+    const name = 'daniel'
+    const empty = undefined
+
+    const e1 = createUser({
+      id,
+      createdAt,
+      name: 'jonathan',
+      empty,
+    })
+
+    try {
+      e1.name = ''
+      expect(true).toBeFalsy()
+    }
+    catch (error) {
+      if (error instanceof ValueError) {
+        expect(error.name).toBe('ValueError')
+        expect(error.message).toBe('name is invalid')
+      }
+      else {
+        expect(true).toBeFalsy()
+      }
+    }
+
+    expect(e1.id).toBe(id)
+    expect(e1.createdAt).toBe(createdAt)
+    expect(name).not.toBe(e1.name)
+    expect(empty).toBe(undefined)
   })
 
   it('EntityLifecycle', () => {

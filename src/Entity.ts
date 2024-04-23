@@ -112,12 +112,19 @@ function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> =
 
         for (const key in attributes) {
           const property = attributes[key] as unknown
-          if (guard(property, 'required') && property.required && !(key in target)) {
-            throw new ValueError(`${JSON.stringify(target)} ${key} is required`)
-          }
+          if (guard(property, 'required') && property.required) {
+            if (!(key in target)) {
+              throw new ValueError(`${JSON.stringify(target)} ${key} is required`)
+            }
 
-          if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
-            throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
+            if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
+              throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
+            }
+          }
+          else if (key in target && 'undefined' !== typeof target[key]) {
+            if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
+              throw new ValueError(`${JSON.stringify(target)} ${key} is invalid`)
+            }
           }
         }
 
