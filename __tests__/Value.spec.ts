@@ -65,7 +65,7 @@ const createEmail = defineValue(Email, {
 
 class Version extends Value<number> {}
 
-const createVersionValue = defineValue(Version, {
+const makeVersionValue = defineValue(Version, {
   validator: (value: number): boolean => 0 < value,
 })
 
@@ -79,7 +79,7 @@ describe('Value', () => {
 
   it('ValueError', () => {
     try {
-      createVersionValue(0)
+      makeVersionValue(0)
       expect(true).toBeFalsy()
     }
     catch (error) {

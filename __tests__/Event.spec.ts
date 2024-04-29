@@ -54,7 +54,7 @@ type User = Event & {
   empty?: string
 }
 
-const createUser = defineEvent<User>({
+const makeUser = defineEvent<User>({
   properties: {
     id: {
       required: true,
@@ -84,7 +84,7 @@ describe('Event', () => {
     const createdAt = new Date()
     const name = 'daniel'
 
-    const e1 = createUser({
+    const e1 = makeUser({
       id,
       createdAt,
       name: 'jonathan',
@@ -102,7 +102,7 @@ describe('Event', () => {
     const createdAt = new Date()
     const name = 'daniel'
 
-    const e1 = createUser({
+    const e1 = makeUser({
       id,
       createdAt,
       name: 'jonathan',
@@ -133,7 +133,7 @@ describe('Event', () => {
     const name = 'daniel'
     const empty = 'yay'
 
-    const e1 = createUser({
+    const e1 = makeUser({
       id,
       createdAt,
       name: 'jonathan',
@@ -166,7 +166,7 @@ describe('Event', () => {
     const name = 'daniel'
     const empty = undefined
 
-    const e1 = createUser({
+    const e1 = makeUser({
       id,
       createdAt,
       name: 'jonathan',

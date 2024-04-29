@@ -78,7 +78,7 @@ type UserRegisterEvent = Event & {
   entity: User
 }
 
-const createUserAggregateRegisterEvent = defineEvent<UserRegisterEvent>({
+const makeUserAggregateRegisterEvent = defineEvent<UserRegisterEvent>({
   properties: {
     entity: {
       validator: (entity: User): boolean => guard<User>(entity),
@@ -117,13 +117,13 @@ class UserAggregate extends Aggregate<User, UserTopics> {
   }
 
   registerAccountSync(): void {
-    this.publishSync('register-user-account-sync', createUserAggregateRegisterEvent({
+    this.publishSync('register-user-account-sync', makeUserAggregateRegisterEvent({
       entity: this.root,
     }))
   }
 
   registerAccount(): void {
-    this.publish('register-user-account', createUserAggregateRegisterEvent({
+    this.publish('register-user-account', makeUserAggregateRegisterEvent({
       entity: this.root,
     }))
   }

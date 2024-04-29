@@ -61,7 +61,7 @@ updating entities, for example:
 
 // ...
 
-export const createUser = defineEntity<User>({
+export const makeUser = defineEntity<User>({
   attributes: {
     id: {
       validator(value): boolean | never {
@@ -92,14 +92,14 @@ export const createUser = defineEntity<User>({
 
 ```typescript
 import { 
-  createUser,
+  makeUser,
 } from './User'
 
 function someFunction(user: User): void {
     // ... do something
 }
 
-const user = createUser({
+const user = makeUser({
   id: '123',
   name: 'Sarah',
   age: 29,
@@ -120,7 +120,7 @@ It is impossible for the user entity to be created and reach the code at line `s
 DomainJS organizes lifecycle hooks within the entity definition itself, like so: 
 
 ```typescript
-export const createUser = defineEntity<User>({
+export const makeUser = defineEntity<User>({
   created(user) {
     // ... do something
   },
@@ -237,7 +237,7 @@ export type User = Entity & {
   email: Email
 }
 
-export const createUser = defineEntity<User>({
+export const makeUser = defineEntity<User>({
   attributes: {
     id: {
       validator(value): boolean | never {
@@ -268,14 +268,14 @@ export const createUser = defineEntity<User>({
 
 ```typescript
 import { 
-  createUser,
+  makeUser,
 } from './User'
 
 import {
   createEmail,
 } from './Email'
 
-const user = createUser({
+const user = makeUser({
   id: '123',
   name: 'Daniel',
   age: 29,
@@ -358,7 +358,7 @@ export class UserAggregate extends Aggregate<User> {
   }
 }
 
-export const createUserAggregate = defineAggregate(UserAggregate, {
+export const makeUserAggregate = defineAggregate(UserAggregate, {
   created(user) {
     // ... do something
   },
@@ -387,14 +387,14 @@ export const createUserAggregate = defineAggregate(UserAggregate, {
 
 ```typescript
 import { 
-  createUserAggregate
+  makeUserAggregate
 } from './UserAggregate'
 
 import {
   createEmail,
 } from './Email'
 
-const user = createUserAggregate({
+const user = makeUserAggregate({
   id: '123',
   name: 'Daniel',
   age: 29,
@@ -503,14 +503,14 @@ export class UserAggregate extends Aggregate<User, UserAggregateEventTopics> {
 
 ```typescript
 import { 
-  createUserAggregate
+  makeUserAggregate
 } from './UserAggregate'
 
 import {
   createEmail,
 } from './Email'
 
-const user = createUserAggregate({
+const user = makeUserAggregate({
   id: '123',
   name: 'Daniel',
   age: 29,
