@@ -181,7 +181,7 @@ export class Email extends Value<string> {
   }
 }
 
-export const createEmail = defineValue(Email, {
+export const makeEmail = defineValue(Email, {
   created(email): void {
     // ... do something
   },
@@ -200,10 +200,10 @@ export const createEmail = defineValue(Email, {
 
 ```typescript
 import { 
-  createEmail,
+  makeEmail,
 } from './Email'
 
-const email = createEmail('me@domain.com')
+const email = makeEmail('me@domain.com')
 
 console.log(email.value) // "me@domain.com"
 console.log(email.domainAddress) // "domain.com"
@@ -272,14 +272,14 @@ import {
 } from './User'
 
 import {
-  createEmail,
+  makeEmail,
 } from './Email'
 
 const user = makeUser({
   id: '123',
   name: 'Daniel',
   age: 29,
-  email: createEmail('me@domain.com'),
+  email: makeEmail('me@domain.com'),
 })
 
 console.log(user.id) // "123"
@@ -391,14 +391,14 @@ import {
 } from './UserAggregate'
 
 import {
-  createEmail,
+  makeEmail,
 } from './Email'
 
 const user = makeUserAggregate({
   id: '123',
   name: 'Daniel',
   age: 29,
-  email: createEmail('me@domain.com'),
+  email: makeEmail('me@domain.com'),
 })
 
 console.log(user.id) // "123"
@@ -507,14 +507,14 @@ import {
 } from './UserAggregate'
 
 import {
-  createEmail,
+  makeEmail,
 } from './Email'
 
 const user = makeUserAggregate({
   id: '123',
   name: 'Daniel',
   age: 29,
-  email: createEmail('me@domain.com'),
+  email: makeEmail('me@domain.com'),
 })
 
 user.subscribe('register-account', (event: RegisterAccountEvent) => {

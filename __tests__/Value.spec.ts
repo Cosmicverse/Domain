@@ -58,7 +58,7 @@ class Email extends Value<string> {
   }
 }
 
-const createEmail = defineValue(Email, {
+const makeEmail = defineValue(Email, {
   validator: (value: string): boolean =>
     'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
 })
@@ -72,7 +72,7 @@ const makeVersionValue = defineValue(Version, {
 describe('Value', () => {
   it('create value', () => {
     const email = 'ME@domain.com'
-    const vo = createEmail(email)
+    const vo = makeEmail(email)
     expect(vo.value).not.toBe(email)
     expect(vo.value).toBe(email.toLowerCase())
   })
@@ -95,7 +95,7 @@ describe('Value', () => {
 
   it('ValidationError', () => {
     try {
-      createEmail('123')
+      makeEmail('123')
       expect(true).toBeFalsy()
     }
     catch (error) {
@@ -111,10 +111,10 @@ describe('Value', () => {
 
   it('get computed value', () => {
     const email1 = 'me@domain.com'
-    const vo1 = createEmail(email1)
+    const vo1 = makeEmail(email1)
 
     const email2 = 'you@domain.com'
-    const vo2 = createEmail(email2)
+    const vo2 = makeEmail(email2)
 
     expect(vo1.value).toBe(email1)
     expect(vo2.value).toBe(email2)

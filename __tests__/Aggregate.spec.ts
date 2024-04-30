@@ -62,7 +62,7 @@ class Email extends Value<string> {
   }
 }
 
-const createEmail = defineValue(Email, {
+const makeEmail = defineValue(Email, {
   validator: (value: string): boolean => 'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
 })
 
@@ -198,7 +198,7 @@ describe('Aggregate', () => {
       createdAt,
       name,
       version,
-      email: createEmail(email),
+      email: makeEmail(email),
     })
 
     a1.subscribe('register-user-account-sync', (event: UserRegisterEvent) => {
