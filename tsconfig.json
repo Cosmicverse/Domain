@@ -41,6 +41,7 @@
   "include": [
     "typings/**/*.d.ts",
     "src/**/*.ts",
+    "src/**/*.js",
     "vite.config*.ts",
     "__tests__/**/*",
     "__benchmarks__/**/*"

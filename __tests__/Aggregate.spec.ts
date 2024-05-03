@@ -130,14 +130,14 @@ class UserAggregate extends Aggregate<User, UserTopics> {
 }
 
 describe('Aggregate', () => {
-  it('createAggregate', () => {
+  it('makeAggregate', () => {
     const id = uuidv4()
     const createdAt = new Date()
     const name = 'daniel'
     const version = 1
     const email = 'susan@domain.com'
 
-    const createAggregate = defineAggregate(UserAggregate, {
+    const makeAggregate = defineAggregate(UserAggregate, {
       trace(entity: User) {
         expect(guard<User>(entity)).toBeTruthy()
       },
@@ -193,7 +193,7 @@ describe('Aggregate', () => {
       },
     })
 
-    const a1 = createAggregate({
+    const a1 = makeAggregate({
       id,
       createdAt,
       name,
