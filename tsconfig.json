@@ -19,7 +19,6 @@
     "checkJs": true,
     "declaration": true,
     "declarationMap": true,
-    "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
