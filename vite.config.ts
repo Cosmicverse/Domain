@@ -54,7 +54,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
   const fileName = 'lib-[format]'
   const formats: LibraryFormats[] = [ 'es', 'cjs' ]
   const emptyOutDir = true
-  const minify = 'development' !== mode
+  const minify = 'production' === mode ? 'terser' : false
 
   const alias = {
     '@': fileURLToPath(new URL(srcDir, import.meta.url)),
