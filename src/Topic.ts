@@ -30,8 +30,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from '@/Aggregate'
-export * from '@/Event'
-export * from '@/Entity'
-export * from '@/Message'
-export * from '@/Value'
+/**
+ * @module Topic
+ */
+
+import {
+  Observable,
+  ObservableTopics,
+} from '@cosmicmind/patternjs'
+
+import {
+  Message,
+} from '@/Message'
+
+/**
+ * Represents a collection of Message topics.
+ *
+ * @extends {ObservableTopics}
+ *
+ * @property {Message} [K] - A message topic.
+ */
+export type MessageTopics = ObservableTopics & {
+  readonly [K: string]: Message
+}
+
+/**
+ * An observable class for handling topics of specific types.
+ *
+ * @template T The message topic type.
+ */
+export class TopicObservable<T extends MessageTopics> extends Observable<T> {}

@@ -36,13 +36,16 @@
 
 import {
   guard,
-  FoundationError,
 } from '@cosmicmind/foundationjs'
 
 import {
-  Observable,
-  ObservableTopics,
-} from '@cosmicmind/patternjs'
+  Message,
+  MessageError,
+  MessageLifecycle,
+  MessagePropertyKey,
+  MessagePropertyLifecycle,
+  MessagePropertyLifecycleMap,
+} from '@/Message'
 
 /**
  * Represents an Event.
@@ -53,70 +56,17 @@ import {
  *   age: 25
  * }
  */
-export type Event = Record<string, unknown>
+export type Event = Message
 
-/**
- * Represents a collection of event topics.
- *
- * @extends {ObservableTopics}
- *
- * @property {Event} [K] - The event topic.
- */
-export type EventTopics = ObservableTopics & {
-  readonly [K: string]: Event
-}
+export type EventPropertyKey<K> = MessagePropertyKey<K>
 
-/**
- * An observable class for handling events of specific types.
- *
- * @template T The event topic type.
- */
-export class EventObservable<T extends EventTopics> extends Observable<T> {}
+export type EventPropertyLifecycle<E extends Event, V> = MessagePropertyLifecycle<E, V>
 
-/**
- * Represents a type that is a valid property key of a given event type.
- *
- * @template K - The event type.
- * @typeparam K - A type is a valid property key.
- *
- * @returns - A valid property key of the event type, or `never` if the key is not a valid property key.
- */
-export type EventPropertyKey<K> = keyof K extends string | symbol ? keyof K : never
+export type EventPropertyLifecycleMap<E extends Event> = MessagePropertyLifecycleMap<E>
 
-/**
- * Represents the lifecycle hooks for an event property.
- *
- * @template E - The type of the event.
- * @template V - The type of the property value.
- */
-export type EventPropertyLifecycle<E extends Event, V> = {
-  required?: boolean
-  validator?(value: V, event: E): boolean | never
-  updated?(newValue: V, oldValue: V, event: E): void
-}
+export class EventError extends MessageError {}
 
-/**
- * Represents a map that defines the lifecycle of event properties.
- *
- * @template E - The type of the event.
- */
-export type EventPropertyLifecycleMap<E extends Event> = {
-  [K in keyof E]?: EventPropertyLifecycle<E, E[K]>
-}
-
-export class EventError extends FoundationError {}
-
-/**
- * Represents the lifecycle methods for an event.
- *
- * @template E - The type of event.
- */
-export type EventLifecycle<E extends Event> = {
-  created?(event: E): void
-  trace?(event: E): void
-  error?(error: EventError): void
-  properties?: EventPropertyLifecycleMap<E>
-}
+export type EventLifecycle<E extends Event> = MessageLifecycle<E>
 
 /**
  * Defines an event with an optional event lifecycle handler.
