@@ -40,23 +40,23 @@ import {
 } from '@cosmicmind/patternjs'
 
 import {
-  Message,
-} from '@/Message'
+  Event,
+} from '@/Event'
 
 /**
- * Represents a collection of Message topics.
+ * Represents a collection of Event topics.
  *
  * @extends {ObservableTopics}
  *
- * @property {Message} [K] - A message topic.
+ * @property {Event} [K] - A event topic.
  */
-export type MessageTopics = ObservableTopics & {
-  readonly [K: string]: Message
+export type EventTopics = ObservableTopics & {
+  readonly [K: string]: Event
 }
 
 /**
  * An observable class for handling topics of specific types.
  *
- * @template T The message topic type.
+ * @template T The event topic type.
  */
-export class TopicObservable<T extends MessageTopics> extends Observable<T> {}
+export class TopicObservable<T extends EventTopics> extends Observable<T> {}
