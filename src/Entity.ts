@@ -103,7 +103,7 @@ export type EntityLifecycle<E extends Entity> = {
  * @returns {(entity: E) => E} A function that creates an entity with the given lifecycle handler.
  */
 export const defineEntity = <E extends Entity>(handler: EntityLifecycle<E> = {}): (entity: E) => E =>
-  (entity: E): E => createEntity(entity, handler)
+  (entity: E): E => makeEntity(entity, handler)
 
 /**
  * Creates a ProxyHandler for Entity instances with the given EntityLifecycle handler.
@@ -114,13 +114,13 @@ export const defineEntity = <E extends Entity>(handler: EntityLifecycle<E> = {})
  * @param handler - The EntityLifecycle handler.
  * @returns A ProxyHandler for Entity instances.
  */
-function createEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): ProxyHandler<E> {
+function makeEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): ProxyHandler<E> {
   return {
     set<A extends EntityPropertyKey<E>, V extends E[A]>(target: E, key: A, value: V): boolean | never {
       const property = handler.properties?.[key]
 
       if (false === property?.validator?.(value, target)) {
-        throwErrorAndTrace(`${JSON.stringify(target)} ${JSON.stringify(key)} is invalid`, handler)
+        throwError(`${JSON.stringify(target)} ${JSON.stringify(key)} is invalid`, handler)
       }
 
       property?.updated?.(value, target[key], target)
@@ -142,7 +142,7 @@ function createEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): Pro
  * @throws {EntityError} - The EntityError instance.
  * @return {never} - This method never returns.
  */
-function throwErrorAndTrace<E extends Entity>(message: string, handler: EntityLifecycle<E>): never {
+function throwError<E extends Entity>(message: string, handler: EntityLifecycle<E>): never {
   const error = new EntityError(message)
   handler.error?.(error)
   throw error
@@ -157,26 +157,26 @@ function throwErrorAndTrace<E extends Entity>(message: string, handler: EntityLi
  * @returns {E} - The created entity object.
  * @throws {EntityError} - If the target object is invalid.
  */
-function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> = {}): E | never {
+function makeEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {
     const properties = handler.properties
 
     if (guard<EntityPropertyLifecycleMap<E>>(properties)) {
-      const entity = new Proxy(target, createEntityHandler(handler))
+      const entity = new Proxy(target, makeEntityHandler(handler))
 
       for (const [ key, property ] of Object.entries(properties) as [string, EntityPropertyLifecycle<E, unknown>][]) {
         if (property.required) {
           if (!(key in target)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is required`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is required`, handler)
           }
 
           if (false === property.validator?.(target[key], entity)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
           }
         }
         else if (key in target && 'undefined' !== typeof target[key]) {
           if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
           }
         }
       }
@@ -188,5 +188,5 @@ function createEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> =
     }
   }
 
-  throwErrorAndTrace(`${JSON.stringify(target)} is invalid`, handler)
+  throwError(`${JSON.stringify(target)} is invalid`, handler)
 }

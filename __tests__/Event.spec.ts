@@ -87,17 +87,15 @@ describe('Event', () => {
     const e1 = makeUser({
       id,
       createdAt,
-      name: 'jonathan',
+      name,
     })
-
-    e1.name = 'daniel'
 
     expect(e1.id).toBe(id)
     expect(e1.createdAt).toBe(createdAt)
     expect(e1.name).toBe(name)
   })
 
-  it('partial validator', () => {
+  it('immutable properties', () => {
     const id = '123'
     const createdAt = new Date()
     const name = 'daniel'
@@ -105,7 +103,7 @@ describe('Event', () => {
     const e1 = makeUser({
       id,
       createdAt,
-      name: 'jonathan',
+      name,
     })
 
     try {
@@ -124,43 +122,10 @@ describe('Event', () => {
 
     expect(e1.id).toBe(id)
     expect(e1.createdAt).toBe(createdAt)
-    expect(name).not.toBe(e1.name)
+    expect(name).toBe(e1.name)
   })
 
-  it('partial validator 2', () => {
-    const id = '123'
-    const createdAt = new Date()
-    const name = 'daniel'
-    const empty = 'yay'
-
-    const e1 = makeUser({
-      id,
-      createdAt,
-      name: 'jonathan',
-      empty,
-    })
-
-    try {
-      e1.name = ''
-      expect(true).toBeFalsy()
-    }
-    catch (error) {
-      if (error instanceof EventError) {
-        expect(error.name).toBe('EventError')
-        expectTypeOf(error.message).toMatchTypeOf<string>()
-      }
-      else {
-        expect(true).toBeFalsy()
-      }
-    }
-
-    expect(e1.id).toBe(id)
-    expect(e1.createdAt).toBe(createdAt)
-    expect(name).not.toBe(e1.name)
-    expect(empty).toBe(e1.empty)
-  })
-
-  it('partial validator 3', () => {
+  it('undefined properties', () => {
     const id = '123'
     const createdAt = new Date()
     const name = 'daniel'
@@ -169,27 +134,13 @@ describe('Event', () => {
     const e1 = makeUser({
       id,
       createdAt,
-      name: 'jonathan',
+      name,
       empty,
     })
 
-    try {
-      e1.name = ''
-      expect(true).toBeFalsy()
-    }
-    catch (error) {
-      if (error instanceof EventError) {
-        expect(error.name).toBe('EventError')
-        expectTypeOf(error.message).toMatchTypeOf<string>()
-      }
-      else {
-        expect(true).toBeFalsy()
-      }
-    }
-
     expect(e1.id).toBe(id)
     expect(e1.createdAt).toBe(createdAt)
-    expect(name).not.toBe(e1.name)
+    expect(name).toBe(e1.name)
     expect(empty).toBe(undefined)
   })
 
@@ -199,10 +150,6 @@ describe('Event', () => {
     const name = 'daniel'
 
     const createEvent = defineEvent<User>({
-      trace(event) {
-        expect(guard(event)).toBeTruthy()
-      },
-
       created(event) {
         expect(guard(event))
       },
@@ -233,13 +180,6 @@ describe('Event', () => {
             expect(2 < event.name.length).toBeTruthy()
             return 2 < value.length
           },
-          updated: (newValue, oldValue, event) => {
-            expect(newValue).toBe('jonathan')
-            expect(oldValue).toBe(name)
-            expect(event.id).toBe(id)
-            expect(event.createdAt).toBe(createdAt)
-            expect(event.name).toBe(name)
-          },
         },
       },
     })
@@ -252,9 +192,6 @@ describe('Event', () => {
 
     expect(e1.id).toBe(id)
     expect(e1.createdAt).toBe(createdAt)
-
-    e1.name = 'jonathan'
-
-    expect('jonathan').toBe(e1.name)
+    expect(e1.name).toBe(e1.name)
   })
 })

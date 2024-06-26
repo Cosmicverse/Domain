@@ -74,16 +74,6 @@ export type EventTopics = ObservableTopics & {
 export class EventObservable<T extends EventTopics> extends Observable<T> {}
 
 /**
- * Represents a type that is a valid property key of a given event type.
- *
- * @template K - The event type.
- * @typeparam K - A type is a valid property key.
- *
- * @returns - A valid property key of the event type, or `never` if the key is not a valid property key.
- */
-export type EventPropertyKey<K> = keyof K extends string | symbol ? keyof K : never
-
-/**
  * Represents the lifecycle hooks for an event property.
  *
  * @template E - The type of the event.
@@ -92,7 +82,6 @@ export type EventPropertyKey<K> = keyof K extends string | symbol ? keyof K : ne
 export type EventPropertyLifecycle<E extends Event, V> = {
   required?: boolean
   validator?(value: V, event: E): boolean | never
-  updated?(newValue: V, oldValue: V, event: E): void
 }
 
 /**
@@ -113,7 +102,6 @@ export class EventError extends FoundationError {}
  */
 export type EventLifecycle<E extends Event> = {
   created?(event: E): void
-  trace?(event: E): void
   error?(error: EventError): void
   properties?: EventPropertyLifecycleMap<E>
 }
@@ -126,32 +114,19 @@ export type EventLifecycle<E extends Event> = {
  * @returns {(event: E) => E} A function that creates an event with the given lifecycle handler.
  */
 export const defineEvent = <E extends Event>(handler: EventLifecycle<E> = {}): (event: E) => E =>
-  (event: E): E => createEvent(event, handler)
+  (event: E): E => makeEvent(event, handler)
 
 /**
- * Creates a ProxyHandler for Event instances with the given EventLifecycle handler.
- * The ProxyHandler intercepts property set operations, validates the new value against the associated property validator,
- * triggers the updated callback for the property, updates the property value, and traces the change if trace is enabled.
+ * Creates a proxy event handler that prevents the modification of event properties.
  *
- * @typeparam E - The type of Event.
- * @param handler - The EventLifecycle handler.
- * @returns A ProxyHandler for Event instances.
+ * @template E - The event type.
+ * @param {EventLifecycle<E>} handler - The event lifecycle handler.
+ * @returns {ProxyHandler<E>} - The proxy event handler.
  */
-function createEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHandler<E> {
+function makeEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHandler<E> {
   return {
-    set<A extends EventPropertyKey<E>, V extends E[A]>(target: E, key: A, value: V): boolean | never {
-      const property = handler.properties?.[key]
-
-      if (false === property?.validator?.(value, target)) {
-        throwErrorAndTrace(`${JSON.stringify(target)} ${String(key)} is invalid`, handler)
-      }
-
-      property?.updated?.(value, target[key], target)
-
-      const result = Reflect.set(target, key, value)
-      handler.trace?.(target)
-
-      return result
+    set(): never {
+      throwError('cannot modify event properties', handler)
     },
   }
 }
@@ -160,13 +135,13 @@ function createEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyH
  * Throws an EventError with a specified event and invokes the error handler.
  *
  * @template E - The type of Event.
- * @param {string} event - The error event.
+ * @param {string} message - The error message.
  * @param {EventLifecycle<E>} handler - The event lifecycle handler.
  * @throws {EventError} - The EventError instance.
  * @return {never} - This method never returns.
  */
-function throwErrorAndTrace<E extends Event>(event: string, handler: EventLifecycle<E>): never {
-  const error = new EventError(event)
+function throwError<E extends Event>(message: string, handler: EventLifecycle<E>): never {
+  const error = new EventError(message)
   handler.error?.(error)
   throw error
 }
@@ -180,32 +155,31 @@ function throwErrorAndTrace<E extends Event>(event: string, handler: EventLifecy
  * @returns {E} - The created event object.
  * @throws {EventError} - If the target object is invalid.
  */
-function createEvent<E extends Event>(target: E, handler: EventLifecycle<E> = {}): E | never {
+function makeEvent<E extends Event>(target: E, handler: EventLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {
     const properties = handler.properties
 
     if (guard<EventPropertyLifecycleMap<E>>(properties)) {
-      const event = new Proxy(target, createEventHandler(handler))
+      const event = new Proxy(target, makeEventHandler(handler))
 
       for (const [ key, property ] of Object.entries(properties) as [string, EventPropertyLifecycle<E, unknown>][]) {
         if (property.required) {
           if (!(key in target)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is required`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is required`, handler)
           }
 
           if (false === property.validator?.(target[key], event)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
           }
         }
         else if (key in target && 'undefined' !== typeof target[key]) {
           if (guard(property, 'validator') && false === property.validator?.(target[key], event)) {
-            throwErrorAndTrace(`${JSON.stringify(target)} ${key} is invalid`, handler)
+            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
           }
         }
       }
 
       handler.created?.(event)
-      handler.trace?.(event)
 
       return event
     }
