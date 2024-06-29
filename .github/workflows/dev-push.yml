@@ -3,7 +3,7 @@ name: Development Push
 on:
   push:
     branches:
-      - dev
+      - develop
 
 jobs:
   lint:
@@ -15,7 +15,7 @@ jobs:
   build:
     uses: cosmicmind/github-actions/.github/workflows/lib-build.yml@release
     with:
-      BUILD_TARGET: dev
+      BUILD_TARGET: develop
       NODE_ENV: development
       VITE_MODE: test
   test:
