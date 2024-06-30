@@ -37,11 +37,14 @@ import {
 } from 'vitest'
 
 import {
+  uuidv4,
+} from 'lib0/random.js'
+
+import {
   string,
 } from 'yup'
 
 import {
-  uuidv4,
   guard,
 } from '@cosmicmind/foundationjs'
 

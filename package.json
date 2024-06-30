@@ -1,6 +1,6 @@
 {
   "name": "@cosmicmind/domainjs",
-  "version": "0.0.1-rc-062524-4",
+  "version": "0.0.1-rc-063024-4",
   "description": "A domain-driven design framework for scalable systems.",
   "keywords": [],
   "author": {
@@ -44,22 +44,23 @@
     "test:coverage": "vitest run --coverage --config vite.config.test.ts --mode ${VITE_MODE:-test}"
   },
   "dependencies": {
-    "@cosmicmind/foundationjs": "^0.0.1-rc-052124-1",
-    "@cosmicmind/patternjs": "^0.0.1-rc-052124-3"
+    "@cosmicmind/foundationjs": "^0.0.1-rc-063024-1",
+    "@cosmicmind/patternjs": "^0.0.1-rc-063024-3"
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@types/node": "^18.19.33",
+    "@types/node": "^18.19.39",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitest/coverage-v8": "^0.34.6",
     "eslint": "^8.57.0",
     "eslint-plugin-yml": "^1.14.0",
     "npm-run-all": "^4.1.5",
-    "terser": "^5.31.0",
+    "lib0": "^0.2.94",
+    "terser": "^5.31.1",
     "ts-node": "^10.9.2",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.5",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.2",
     "vite": "^4.5.3",
     "vite-plugin-dts": "^1.7.3",
     "vitest": "^0.34.6",
