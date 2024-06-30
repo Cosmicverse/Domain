@@ -38,7 +38,7 @@ import {
 
 import {
   uuidv4,
-} from 'lib0/random.js'
+} from 'lib0/random'
 
 import {
   string,
