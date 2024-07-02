@@ -10,3 +10,5 @@ logs
 *.local
 *.log
 *.icloud
+.volume
+.data
