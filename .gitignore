@@ -3,6 +3,7 @@ node_modules
 dist
 coverage
 logs
+target
 .docker
 .fleet
 .idea
