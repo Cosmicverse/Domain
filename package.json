@@ -49,21 +49,21 @@
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@types/node": "^18.19.39",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "@vitest/coverage-v8": "^0.34.6",
+    "@types/node": "^20.14.9",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "@vitest/coverage-v8": "^1.6.0",
     "eslint": "^8.57.0",
     "eslint-plugin-yml": "^1.14.0",
-    "npm-run-all": "^4.1.5",
     "lib0": "^0.2.94",
+    "npm-run-all": "^4.1.5",
     "terser": "^5.31.1",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
-    "typescript": "^5.5.2",
-    "vite": "^4.5.3",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3",
     "vite-plugin-dts": "^1.7.3",
-    "vitest": "^0.34.6",
-    "yup": "^0.32.11"
+    "vitest": "^1.6.0",
+    "yup": "^1.4.0"
   }
 }
