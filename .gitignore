@@ -13,3 +13,4 @@ target
 *.icloud
 .volume
 .data
+.local
