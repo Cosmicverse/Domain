@@ -1,9 +1,0 @@
-name: Mark Stale
-
-on:
-  schedule:
-    - cron: '44 18 * * *'
-
-jobs:
-  stale:
-    uses: cosmicmind/actions/.github/workflows/stale.yml@release
