@@ -9,19 +9,26 @@ on:
 jobs:
   lint:
     uses: cosmicmind/actions/.github/workflows/lint-code.yml@release
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  codeql:
-    uses: cosmicmind/actions/.github/workflows/codeql.yml@release
+
   build:
+    needs:
+      - lint
+    uses: cosmicmind/actions/.github/workflows/build-package.yml@release
+    with:
+      BUILD_TARGET: develop
+      NODE_ENV: development
+      VITE_MODE: development
+
+  test:
+    needs:
+      - build
     uses: cosmicmind/actions/.github/workflows/build-package.yml@release
     with:
       BUILD_TARGET: develop
       NODE_ENV: development
       VITE_MODE: test
-  test:
-    uses: cosmicmind/actions/.github/workflows/build-package.yml@release
-    with:
-      BUILD_TARGET: test
-      NODE_ENV: development
-      VITE_MODE: test
+
+  codeql:
+    needs:
+      - test
+    uses: cosmicmind/actions/.github/workflows/codeql.yml@release
