@@ -24,7 +24,7 @@ jobs:
       - build
     uses: cosmicmind/actions/.github/workflows/build-package.yml@release
     with:
-      BUILD_TARGET: develop
+      BUILD_TARGET: test
       NODE_ENV: development
       VITE_MODE: test
 
