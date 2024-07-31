@@ -39,6 +39,6 @@ import {
   ObservableTopics as OT,
 } from '@cosmicmind/patternjs'
 
-export type Topics = OT
+export type ObservableTopics = OT
 
-export class ObservableTopics<T extends Topics> extends O<T> {}
+export class Observable<T extends ObservableTopics> extends O<T> {}

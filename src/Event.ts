@@ -42,42 +42,46 @@ import {
 import {
   Observable,
   ObservableTopics,
-} from '@cosmicmind/patternjs'
+} from '@/Topic'
 
 /**
- * Represents an Event.
+ * Represents an event.
  *
- * @example
- * const event: Event = {
- *   name: 'John Doe',
- *   age: 25
- * }
+ * @typedef {Record<string, unknown>} Event
  */
 export type Event = Record<string, unknown>
 
 /**
  * Represents a collection of event topics.
  *
- * @extends {ObservableTopics}
+ * @typedef {Object} EventTopics
+ * @extends ObservableTopics
  *
- * @property {Event} [K] - The event topic.
+ * An EventTopics object is an extension of the ObservableTopics interface,
+ * which defines a collection of event topics. Each topic is accessible as
+ * a property of the EventTopics object, using the topic name as the property
+ * key. The value of each property is an Event object, representing the specific
+ * event topic.
+ *
+ * @property {Event} topicName - The event object representing the specific topic.
+ * @readonly
  */
 export type EventTopics = ObservableTopics & {
   readonly [K: string]: Event
 }
 
 /**
- * An observable class for handling events of specific types.
+ * Represents an observable for events.
  *
- * @template T The event topic type.
+ * @typeparam T - The type of event topics.
  */
 export class EventObservable<T extends EventTopics> extends Observable<T> {}
 
 /**
- * Represents the lifecycle hooks for an event property.
+ * Represents the lifecycle configuration for an event property.
  *
- * @template E - The type of the event.
- * @template V - The type of the property value.
+ * @template E - The type of event this property belongs to.
+ * @template V - The type of value this property takes.
  */
 export type EventPropertyLifecycle<E extends Event, V> = {
   required?: boolean
@@ -85,20 +89,25 @@ export type EventPropertyLifecycle<E extends Event, V> = {
 }
 
 /**
- * Represents a map that defines the lifecycle of event properties.
- *
- * @template E - The type of the event.
+ * Represents a map of event properties and their associated lifecycles.
+ * @template E - The type of event.
  */
 export type EventPropertyLifecycleMap<E extends Event> = {
   [K in keyof E]?: EventPropertyLifecycle<E, E[K]>
 }
 
+/**
+ * Custom error class for event-related errors.
+ *
+ * @class EventError
+ * @extends FoundationError
+ */
 export class EventError extends FoundationError {}
 
 /**
- * Represents the lifecycle methods for an event.
+ * Represents the lifecycle of an event.
  *
- * @template E - The type of event.
+ * @template E - The type of the event.
  */
 export type EventLifecycle<E extends Event> = {
   created?(event: E): void
@@ -107,21 +116,21 @@ export type EventLifecycle<E extends Event> = {
 }
 
 /**
- * Defines an event with an optional event lifecycle handler.
+ * Defines an event handler function.
  *
- * @template E The type of the event.
- * @param {EventLifecycle<E>} [handler={}] The optional event lifecycle handler.
- * @returns {(event: E) => E} A function that creates an event with the given lifecycle handler.
+ * @param {EventLifecycle<E>} [handler={}] - The event lifecycle handler object.
+ * @returns {(event: E) => E} - The event handler function.
+ * @template E - The type of event.
  */
 export const defineEvent = <E extends Event>(handler: EventLifecycle<E> = {}): (event: E) => E =>
   (event: E): E => makeEvent(event, handler)
 
 /**
- * Creates a proxy event handler that prevents the modification of event properties.
+ * Creates a proxy handler for event objects that disallows modification of event properties.
  *
- * @template E - The event type.
+ * @template E - The type of the event object.
  * @param {EventLifecycle<E>} handler - The event lifecycle handler.
- * @returns {ProxyHandler<E>} - The proxy event handler.
+ * @returns {ProxyHandler<E>} - The proxy handler for the event object.
  */
 function makeEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHandler<E> {
   return {
@@ -132,28 +141,27 @@ function makeEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHan
 }
 
 /**
- * Throws an EventError with a specified event and invokes the error handler.
- *
- * @template E - The type of Event.
- * @param {string} message - The error message.
- * @param {EventLifecycle<E>} handler - The event lifecycle handler.
- * @throws {EventError} - The EventError instance.
- * @return {never} - This method never returns.
+ * Throws an EventError and invokes the error handler.
+ * @template E - The type of event.
+ * @param {string} event - The event name.
+ * @param {EventLifecycle<E>} handler - The event handler.
+ * @throws {EventError} - The error that is thrown.
+ * @returns {never} - This method never returns as it always throws an error.
  */
-function throwError<E extends Event>(message: string, handler: EventLifecycle<E>): never {
-  const error = new EventError(message)
+function throwError<E extends Event>(event: string, handler: EventLifecycle<E>): never {
+  const error = new EventError(event)
   handler.error?.(error)
   throw error
 }
 
 /**
- * Creates an event of type `E`.
+ * Creates a new event object and applies lifecycle handlers and validators to its properties.
  *
- * @template E - The type of the event to create.
- * @param {E} target - The target object to create the event from.
- * @param {EventLifecycle<E>} [handler={}] - The lifecycle handler for the event.
- * @returns {E} - The created event object.
- * @throws {EventError} - If the target object is invalid.
+ * @template E - The type of the event object.
+ * @param {E} target - The target event object.
+ * @param {EventLifecycle<E>} [handler={}] - An optional object containing lifecycle handlers and validators.
+ * @throws {EventError} - Throws an error if the target event object is invalid.
+ * @returns {E | never} - The created event object with applied lifecycle handlers and validators.
  */
 function makeEvent<E extends Event>(target: E, handler: EventLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {

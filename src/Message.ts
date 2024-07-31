@@ -42,39 +42,33 @@ import {
 import {
   Observable,
   ObservableTopics,
-} from '@cosmicmind/patternjs'
+} from '@/Topic'
 
 /**
- * Represents an Message.
- *
- * @example
- * const message: Message = {
- *   name: 'John Doe',
- *   age: 25
- * }
+ * Represents a generic message.
  */
 export type Message = Record<string, unknown>
 
 /**
  * Represents a collection of message topics.
  *
- * @extends {ObservableTopics}
- *
- * @property {Message} [K] - The message topic.
+ * @typedef {Object} MessageTopics
+ * @extends ObservableTopics
+ * @property {Message} [K] - The topic name mapped to its corresponding message.
  */
 export type MessageTopics = ObservableTopics & {
   readonly [K: string]: Message
 }
 
 /**
- * An observable class for handling messages of specific types.
+ * Represents an Observable that emits messages of a specific topic.
  *
- * @template T The message topic type.
+ * @template T - The type of the message topic.
  */
 export class MessageObservable<T extends MessageTopics> extends Observable<T> {}
 
 /**
- * Represents the lifecycle hooks for an message property.
+ * Type definition for the lifecycle of a message property.
  *
  * @template E - The type of the message.
  * @template V - The type of the property value.
@@ -85,20 +79,24 @@ export type MessagePropertyLifecycle<E extends Message, V> = {
 }
 
 /**
- * Represents a map that defines the lifecycle of message properties.
+ * Represents a map of property lifecycles for a message class.
  *
- * @template E - The type of the message.
+ * @template E - The message class type.
  */
 export type MessagePropertyLifecycleMap<E extends Message> = {
   [K in keyof E]?: MessagePropertyLifecycle<E, E[K]>
 }
 
+/**
+ * Error class for message-related errors.
+ *
+ * @extends {FoundationError}
+ */
 export class MessageError extends FoundationError {}
 
 /**
- * Represents the lifecycle methods for an message.
- *
- * @template E - The type of message.
+ * Represents the lifecycle events for a message.
+ * @template E The type of the message.
  */
 export type MessageLifecycle<E extends Message> = {
   created?(message: E): void
@@ -107,21 +105,20 @@ export type MessageLifecycle<E extends Message> = {
 }
 
 /**
- * Defines an message with an optional message lifecycle handler.
- *
- * @template E The type of the message.
- * @param {MessageLifecycle<E>} [handler={}] The optional message lifecycle handler.
- * @returns {(message: E) => E} A function that creates an message with the given lifecycle handler.
+ * Define message function.
+ * @template E - Type of the message.
+ * @param {MessageLifecycle<E>} [handler={}] - Message lifecycle handler.
+ * @returns {(message: E) => E} - A function that creates and processes the message.
  */
 export const defineMessage = <E extends Message>(handler: MessageLifecycle<E> = {}): (message: E) => E =>
   (message: E): E => makeMessage(message, handler)
 
 /**
- * Creates a proxy message handler that prmessages the modification of message properties.
+ * Creates a proxy handler to be used as a message handler.
  *
- * @template E - The message type.
+ * @template E - The type of the message object.
  * @param {MessageLifecycle<E>} handler - The message lifecycle handler.
- * @returns {ProxyHandler<E>} - The proxy message handler.
+ * @returns {ProxyHandler<E>} - The proxy handler for the message.
  */
 function makeMessageHandler<E extends Message>(handler: MessageLifecycle<E>): ProxyHandler<E> {
   return {
@@ -132,13 +129,13 @@ function makeMessageHandler<E extends Message>(handler: MessageLifecycle<E>): Pr
 }
 
 /**
- * Throws an MessageError with a specified message and invokes the error handler.
+ * Throws an error with the provided message and calls the error handler.
+ * This method does not return normally.
  *
- * @template E - The type of Message.
+ * @template E - The type of the message.
  * @param {string} message - The error message.
- * @param {MessageLifecycle<E>} handler - The message lifecycle handler.
- * @throws {MessageError} - The MessageError instance.
- * @return {never} - This method never returns.
+ * @param {MessageLifecycle<E>} handler - The error handler to call.
+ * @throws {MessageError} - The thrown error.
  */
 function throwError<E extends Message>(message: string, handler: MessageLifecycle<E>): never {
   const error = new MessageError(message)
@@ -147,13 +144,13 @@ function throwError<E extends Message>(message: string, handler: MessageLifecycl
 }
 
 /**
- * Creates an message of type `E`.
+ * Creates a message object and applies lifecycle methods and validations.
  *
- * @template E - The type of the message to create.
- * @param {E} target - The target object to create the message from.
- * @param {MessageLifecycle<E>} [handler={}] - The lifecycle handler for the message.
- * @returns {E} - The created message object.
- * @throws {MessageError} - If the target object is invalid.
+ * @template E - Type of the message object.
+ * @param {E} target - The message object to be created.
+ * @param {MessageLifecycle<E>} handler - The lifecycle methods and validators for the message object. (Optional)
+ * @returns {E | never} - The created message object.
+ * @throws {MessageError} - If the target is invalid.
  */
 function makeMessage<E extends Message>(target: E, handler: MessageLifecycle<E> = {}): E | never {
   if (guard<E>(target)) {
