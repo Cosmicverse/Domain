@@ -41,11 +41,11 @@ import {
 } from '@/Entity'
 
 import {
-  EventTopics,
-  EventObservable,
-} from '@/Event'
+  Topics,
+  ObservableTopics,
+} from '@/Topic'
 
-export abstract class Aggregate<E extends Entity, T extends EventTopics = EventTopics> extends EventObservable<T> {
+export abstract class Aggregate<E extends Entity, T extends Topics = Topics> extends ObservableTopics<T> {
   protected root: E
 
   constructor(root: E) {

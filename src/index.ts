@@ -33,4 +33,6 @@
 export * from '@/Aggregate'
 export * from '@/Event'
 export * from '@/Entity'
+export * from '@/Message'
+export * from '@/Topic'
 export * from '@/Value'
