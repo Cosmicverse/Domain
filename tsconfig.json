@@ -5,8 +5,8 @@
       "node",
       "vite/client"
     ],
-    "target": "esnext",
-    "module": "esnext",
+    "target": "ESNext",
+    "module": "ESNext",
     "strict": true,
     "importHelpers": true,
     "moduleResolution": "node",
@@ -29,7 +29,7 @@
     "removeComments": true,
     "isolatedModules": true,
     "lib": [
-      "esnext"
+      "ESNext"
     ],
     "rootDir": ".",
     "baseUrl": ".",

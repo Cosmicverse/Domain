@@ -21,125 +21,128 @@ overrides:
         - 0
 rules:
   '@typescript-eslint/no-empty-interface':
-    - 2
+    - error
   '@typescript-eslint/no-inferrable-types':
-    - 2
+    - error
   '@typescript-eslint/explicit-function-return-type':
-    - 2
+    - error
   eqeqeq:
-    - 2
+    - error
   camelcase:
-    - 2
+    - error
   no-console:
-    - 2
+    - error
   no-lonely-if:
-    - 2
+    - error
   comma-dangle:
-    - 2
+    - error
     - arrays: never
       objects: always-multiline
       imports: always-multiline
       exports: always-multiline
       functions: never
   indent:
-    - 2
-    - 2
+    - error
+    - 4
+    - SwitchCase: 1
+  no-tabs:
+    - error
   object-curly-spacing:
-    - 2
+    - error
     - always
   array-bracket-spacing:
-    - 2
+    - error
     - always
   curly:
-    - 2
+    - error
     - all
   template-curly-spacing:
-    - 2
+    - error
   no-trailing-spaces:
-    - 2
+    - error
   no-spaced-func:
-    - 2
+    - error
   space-before-blocks:
-    - 2
+    - error
   semi:
-    - 2
+    - error
     - never
   object-curly-newline:
-    - 2
+    - error
     - multiline: true
       minProperties: 2
       consistent: true
   object-property-newline:
-    - 2
+    - error
   object-shorthand:
-    - 2
+    - error
   no-param-reassign:
-    - 2
+    - error
     - props: false
   no-extra-parens:
-    - 2
+    - error
   no-return-await:
-    - 2
+    - error
   no-self-compare:
-    - 2
+    - error
   no-template-curly-in-string:
-    - 2
+    - error
   no-throw-literal:
-    - 2
+    - error
   no-undef-init:
-    - 2
+    - error
   no-unmodified-loop-condition:
-    - 2
+    - error
   no-unneeded-ternary:
-    - 2
+    - error
   no-unreachable-loop:
-    - 2
+    - error
   no-unsafe-optional-chaining:
-    - 2
+    - error
   no-unused-expressions:
-    - 2
+    - error
   no-use-before-define:
-    - 2
+    - error
     - functions: false
   no-useless-backreference:
-    - 2
+    - error
   no-useless-call:
-    - 2
+    - error
   no-useless-computed-key:
-    - 2
+    - error
   no-useless-concat:
-    - 2
+    - error
   no-useless-constructor:
-    - 2
+    - error
   no-useless-rename:
-    - 2
+    - error
   no-useless-return:
-    - 2
+    - error
   no-var:
-    - 2
+    - error
   nonblock-statement-body-position:
-    - 2
+    - error
   one-var-declaration-per-line:
-    - 2
+    - error
   prefer-arrow-callback:
-    - 2
+    - error
   prefer-const:
-    - 2
+    - error
   prefer-exponentiation-operator:
-    - 2
+    - error
   prefer-numeric-literals:
-    - 2
+    - error
   prefer-object-spread:
-    - 2
+    - error
   prefer-promise-reject-errors:
-    - 2
+    - error
   prefer-template:
-    - 2
+    - error
   prefer-rest-params:
-    - 2
+    - error
   rest-spread-spacing:
-    - 2
+    - error
   require-atomic-updates:
-    - 2
+    - error
   require-await:
-    - 2
+    - error
