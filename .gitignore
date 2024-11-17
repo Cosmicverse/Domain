@@ -5,6 +5,7 @@ build
 coverage
 logs
 target
+cmake-build-debug
 .docker
 .fleet
 .idea
