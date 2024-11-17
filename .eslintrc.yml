@@ -3,18 +3,14 @@ env:
   node: true
   browser: true
   es2021: true
-parser: 'vue-eslint-parser'
 parserOptions:
   parser: '@typescript-eslint/parser'
   ecmaVersion: 2021
   sourceType: module
 plugins:
   - '@typescript-eslint'
-  - 'import'
-  - 'vue'
 extends:
   - eslint:recommended
-  - plugin:vue/vue3-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:import/errors
   - plugin:import/warnings
@@ -131,20 +127,6 @@ rules:
       alphabetize:
         order: asc
         caseInsensitive: true
-  vue/html-indent:
-    - error
-    - 4
-  vue/max-attributes-per-line:
-    - error
-    - singleline: 3
-      multiline: 1
-  vue/require-default-prop: off
-  vue/html-self-closing:
-    - error
-    - html:
-        void: never
-        normal: always
-        component: always
 settings:
   import/resolver:
     typescript: {}
