@@ -35,25 +35,25 @@
  */
 
 import {
-  Entity,
-  EntityLifecycle,
-  defineEntity,
+    Entity,
+    EntityLifecycle,
+    defineEntity,
 } from '@/Entity'
 
 import {
-  Observable,
-  ObservableTopics,
-} from '@/Topic'
+    EventTopics,
+    EventObservable,
+} from '@/Event'
 
-export abstract class Aggregate<E extends Entity, T extends ObservableTopics = ObservableTopics> extends Observable<T> {
-  protected root: E
+export abstract class Aggregate<E extends Entity, T extends EventTopics = EventTopics> extends EventObservable<T> {
+    protected root: E
 
-  constructor(root: E) {
-    super()
-    this.root = 'function' === typeof this.prepare ? this.prepare(root) : root
-  }
+    constructor(root: E) {
+        super()
+        this.root = 'function' === typeof this.prepare ? this.prepare(root) : root
+    }
 
-  protected prepare?(root: E): E
+    protected prepare?(root: E): E
 }
 
 export type AggregateTypeFor<A> = A extends Aggregate<infer E> ? E : A
@@ -61,6 +61,6 @@ export type AggregateTypeFor<A> = A extends Aggregate<infer E> ? E : A
 export type AggregateConstructor<A extends Aggregate<Entity>> = new (root: AggregateTypeFor<A>) => A
 
 export function defineAggregate<A extends Aggregate<Entity>>(_class: AggregateConstructor<A>, handler: EntityLifecycle<AggregateTypeFor<A>> = {}): (root: AggregateTypeFor<A>) => A {
-  const createEntity = defineEntity<AggregateTypeFor<A>>(handler)
-  return (root: AggregateTypeFor<A>): A => new _class(createEntity(root))
+    const createEntity = defineEntity<AggregateTypeFor<A>>(handler)
+    return (root: AggregateTypeFor<A>): A => new _class(createEntity(root))
 }

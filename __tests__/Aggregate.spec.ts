@@ -31,195 +31,195 @@
  */
 
 import {
-  it,
-  expect,
-  describe,
+    it,
+    expect,
+    describe,
 } from 'vitest'
 
 import {
-  uuidv4,
+    uuidv4,
 } from 'lib0/random'
 
 import {
-  string,
+    string,
 } from 'yup'
 
 import {
-  guard,
+    guard,
 } from '@cosmicmind/foundationjs'
 
 import {
-  Entity,
-  Aggregate,
-  defineAggregate,
-  Event,
-  EventTopics,
-  defineEvent,
-  Value,
-  defineValue,
+    Entity,
+    Aggregate,
+    defineAggregate,
+    Event,
+    EventTopics,
+    defineEvent,
+    Value,
+    defineValue,
 } from '@/index'
 
 class Email extends Value<string> {
-  get domainAddress(): string {
-    return this.value.split('@')[1]
-  }
+    get domainAddress(): string {
+        return this.value.split('@')[1]
+    }
 }
 
 const makeEmail = defineValue(Email, {
-  validator: (value: string): boolean => 'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
+    validator: (value: string): boolean => 'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
 })
 
 interface User extends Entity {
-  readonly id: string
-  readonly createdAt: Date
-  name: string
-  version: number
-  email: Email
+    readonly id: string
+    readonly createdAt: Date
+    name: string
+    version: number
+    email: Email
 }
 
 type UserRegisterEvent = Event & {
-  entity: User
+    entity: User
 }
 
 const makeUserAggregateRegisterEvent = defineEvent<UserRegisterEvent>({
-  properties: {
-    entity: {
-      validator: (entity: User): boolean => guard<User>(entity),
+    properties: {
+        entity: {
+            validator: (entity: User): boolean => guard<User>(entity),
+        },
     },
-  },
 })
 
 type UserTopics = EventTopics & {
-  'register-user-account-sync': UserRegisterEvent
-  'register-user-account': UserRegisterEvent
+    'register-user-account-sync': UserRegisterEvent
+    'register-user-account': UserRegisterEvent
 }
 
 class UserAggregate extends Aggregate<User, UserTopics> {
-  get id(): string {
-    return this.root.id
-  }
+    get id(): string {
+        return this.root.id
+    }
 
-  get createdAt(): Date {
-    return this.root.createdAt
-  }
+    get createdAt(): Date {
+        return this.root.createdAt
+    }
 
-  get name(): string {
-    return this.root.name
-  }
+    get name(): string {
+        return this.root.name
+    }
 
-  get version(): number {
-    return this.root.version
-  }
+    get version(): number {
+        return this.root.version
+    }
 
-  get user(): User {
-    return this.root
-  }
+    get user(): User {
+        return this.root
+    }
 
-  updateName(): void {
-    this.root.name = 'jonathan'
-  }
+    updateName(): void {
+        this.root.name = 'jonathan'
+    }
 
-  registerAccountSync(): void {
-    this.publishSync('register-user-account-sync', makeUserAggregateRegisterEvent({
-      entity: this.root,
-    }))
-  }
+    registerAccountSync(): void {
+        this.publishSync('register-user-account-sync', makeUserAggregateRegisterEvent({
+            entity: this.root,
+        }))
+    }
 
-  registerAccount(): void {
-    this.publish('register-user-account', makeUserAggregateRegisterEvent({
-      entity: this.root,
-    }))
-  }
+    registerAccount(): void {
+        this.publish('register-user-account', makeUserAggregateRegisterEvent({
+            entity: this.root,
+        }))
+    }
 }
 
 describe('Aggregate', () => {
-  it('makeAggregate', () => {
-    const id = uuidv4()
-    const createdAt = new Date()
-    const name = 'daniel'
-    const version = 1
-    const email = 'susan@domain.com'
+    it('makeAggregate', () => {
+        const id = uuidv4()
+        const createdAt = new Date()
+        const name = 'daniel'
+        const version = 1
+        const email = 'susan@domain.com'
 
-    const makeAggregate = defineAggregate(UserAggregate, {
-      trace(entity: User) {
-        expect(guard<User>(entity)).toBeTruthy()
-      },
+        const makeAggregate = defineAggregate(UserAggregate, {
+            trace(entity: User) {
+                expect(guard<User>(entity)).toBeTruthy()
+            },
 
-      created(entity: User) {
-        expect(guard<User>(entity)).toBeTruthy()
-      },
+            created(entity: User) {
+                expect(guard<User>(entity)).toBeTruthy()
+            },
 
-      properties: {
-        id: {
-          validator(value: string) {
-            expect(value).toBe(id)
-            return 2 < value.length
-          },
-        },
+            properties: {
+                id: {
+                    validator(value: string) {
+                        expect(value).toBe(id)
+                        return 2 < value.length
+                    },
+                },
 
-        createdAt: {
-          validator(value: Date) {
-            expect(value).toBe(createdAt)
-            return guard<Date>(value)
-          },
-        },
+                createdAt: {
+                    validator(value: Date) {
+                        expect(value).toBe(createdAt)
+                        return guard<Date>(value)
+                    },
+                },
 
-        name: {
-          validator(value: string) {
-            expect(2 < value.length).toBeTruthy()
-            return 2 < value.length
-          },
+                name: {
+                    validator(value: string) {
+                        expect(2 < value.length).toBeTruthy()
+                        return 2 < value.length
+                    },
 
-          updated: (newValue: string, oldValue: string, entity: User): void => {
-            expect(newValue).toBe('jonathan')
-            expect(oldValue).toBe(name)
-            expect(entity.id).toBe(id)
-            expect(entity.createdAt).toBe(createdAt)
-            expect(entity.name).toBe(name)
-          },
-        },
+                    updated: (newValue: string, oldValue: string, entity: User): void => {
+                        expect(newValue).toBe('jonathan')
+                        expect(oldValue).toBe(name)
+                        expect(entity.id).toBe(id)
+                        expect(entity.createdAt).toBe(createdAt)
+                        expect(entity.name).toBe(name)
+                    },
+                },
 
-        version: {
-          validator(value: number) {
-            expect(0 < value).toBeTruthy()
-            return 0 < value
-          },
-        },
+                version: {
+                    validator(value: number) {
+                        expect(0 < value).toBeTruthy()
+                        return 0 < value
+                    },
+                },
 
-        email: {
-          validator(value: Email, entity: User) {
-            expect(email).toBe(value.value)
-            expect(email).toBe(entity.email.value)
-            return email === value.value
-          },
-        },
-      },
+                email: {
+                    validator(value: Email, entity: User) {
+                        expect(email).toBe(value.value)
+                        expect(email).toBe(entity.email.value)
+                        return email === value.value
+                    },
+                },
+            },
+        })
+
+        const a1 = makeAggregate({
+            id,
+            createdAt,
+            name,
+            version,
+            email: makeEmail(email),
+        })
+
+        a1.subscribe('register-user-account-sync', (event: UserRegisterEvent) => {
+            expect(event.entity).toStrictEqual(a1.user)
+        })
+
+        a1.subscribe('register-user-account', (event: UserRegisterEvent) => {
+            expect(event.entity).toStrictEqual(a1.user)
+        })
+
+        a1.updateName()
+
+        a1.registerAccountSync()
+        a1.registerAccount()
+
+        expect(a1.id).toBe(id)
+        expect(a1.createdAt).toBe(createdAt)
+        expect(a1.name).toBe('jonathan')
+        expect(a1.version).toBe(version)
     })
-
-    const a1 = makeAggregate({
-      id,
-      createdAt,
-      name,
-      version,
-      email: makeEmail(email),
-    })
-
-    a1.subscribe('register-user-account-sync', (event: UserRegisterEvent) => {
-      expect(event.entity).toStrictEqual(a1.user)
-    })
-
-    a1.subscribe('register-user-account', (event: UserRegisterEvent) => {
-      expect(event.entity).toStrictEqual(a1.user)
-    })
-
-    a1.updateName()
-
-    a1.registerAccountSync()
-    a1.registerAccount()
-
-    expect(a1.id).toBe(id)
-    expect(a1.createdAt).toBe(createdAt)
-    expect(a1.name).toBe('jonathan')
-    expect(a1.version).toBe(version)
-  })
 })

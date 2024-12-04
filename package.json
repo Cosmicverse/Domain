@@ -1,6 +1,6 @@
 {
   "name": "@cosmicmind/domainjs",
-  "version": "0.0.1-rc-073024-4-a",
+  "version": "0.0.1-rc-120324-4-a",
   "description": "A domain-driven design framework for scalable systems.",
   "keywords": [],
   "author": {
@@ -48,22 +48,22 @@
     "@cosmicmind/patternjs": "^0.0.1-rc-072224-3",
     "lib0": "^0.2.98",
     "npm-run-all": "^4.1.5",
-    "terser": "^5.34.1",
+    "terser": "^5.36.0",
     "ts-node": "^10.9.2",
-    "tslib": "^2.7.0",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.8",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
     "vite-plugin-dts": "^1.7.3",
     "vitest": "^1.6.0",
-    "yup": "^1.4.0"
+    "yup": "^1.5.0"
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@types/node": "^20.14.11",
+    "@types/node": "^20.17.9",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^1.6.0",
     "eslint": "^8.57.1",
-    "eslint-plugin-yml": "^1.14.0"
+    "eslint-plugin-yml": "^1.16.0"
   }
 }
