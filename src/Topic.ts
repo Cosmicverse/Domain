@@ -35,8 +35,8 @@
  */
 
 import {
-  Observable as O,
-  ObservableTopics as OT,
+    Observable as O,
+    ObservableTopics as OT,
 } from '@cosmicmind/patternjs'
 
 export type ObservableTopics = OT

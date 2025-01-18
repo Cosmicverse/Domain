@@ -35,8 +35,8 @@
  */
 
 import {
-  guard,
-  FoundationError,
+    guard,
+    FoundationError,
 } from '@cosmicmind/foundationjs'
 
 /**
@@ -103,7 +103,7 @@ export type EntityLifecycle<E extends Entity> = {
  * @returns {(entity: E) => E} A function that creates an entity with the given lifecycle handler.
  */
 export const defineEntity = <E extends Entity>(handler: EntityLifecycle<E> = {}): (entity: E) => E =>
-  (entity: E): E => makeEntity(entity, handler)
+    (entity: E): E => makeEntity(entity, handler)
 
 /**
  * Creates a ProxyHandler for Entity instances with the given EntityLifecycle handler.
@@ -115,22 +115,22 @@ export const defineEntity = <E extends Entity>(handler: EntityLifecycle<E> = {})
  * @returns A ProxyHandler for Entity instances.
  */
 function makeEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): ProxyHandler<E> {
-  return {
-    set<A extends EntityPropertyKey<E>, V extends E[A]>(target: E, key: A, value: V): boolean | never {
-      const property = handler.properties?.[key]
+    return {
+        set<A extends EntityPropertyKey<E>, V extends E[A]>(target: E, key: A, value: V): boolean | never {
+            const property = handler.properties?.[key]
 
-      if (false === property?.validator?.(value, target)) {
-        throwError(`${JSON.stringify(target)} ${JSON.stringify(key)} is invalid`, handler)
-      }
+            if (false === property?.validator?.(value, target)) {
+                throwError(`${JSON.stringify(target)} ${JSON.stringify(key)} is invalid`, handler)
+            }
 
-      property?.updated?.(value, target[key], target)
+            property?.updated?.(value, target[key], target)
 
-      const result = Reflect.set(target, key, value)
-      handler.trace?.(target)
+            const result = Reflect.set(target, key, value)
+            handler.trace?.(target)
 
-      return result
-    },
-  }
+            return result
+        },
+    }
 }
 
 /**
@@ -143,9 +143,9 @@ function makeEntityHandler<E extends Entity>(handler: EntityLifecycle<E>): Proxy
  * @return {never} - This method never returns.
  */
 function throwError<E extends Entity>(message: string, handler: EntityLifecycle<E>): never {
-  const error = new EntityError(message)
-  handler.error?.(error)
-  throw error
+    const error = new EntityError(message)
+    handler.error?.(error)
+    throw error
 }
 
 /**
@@ -158,35 +158,35 @@ function throwError<E extends Entity>(message: string, handler: EntityLifecycle<
  * @throws {EntityError} - If the target object is invalid.
  */
 function makeEntity<E extends Entity>(target: E, handler: EntityLifecycle<E> = {}): E | never {
-  if (guard<E>(target)) {
-    const properties = handler.properties
+    if (guard<E>(target)) {
+        const properties = handler.properties
 
-    if (guard<EntityPropertyLifecycleMap<E>>(properties)) {
-      const entity = new Proxy(target, makeEntityHandler(handler))
+        if (guard<EntityPropertyLifecycleMap<E>>(properties)) {
+            const entity = new Proxy(target, makeEntityHandler(handler))
 
-      for (const [ key, property ] of Object.entries(properties) as [string, EntityPropertyLifecycle<E, unknown>][]) {
-        if (property.required) {
-          if (!(key in target)) {
-            throwError(`${JSON.stringify(target)} ${key} is required`, handler)
-          }
+            for (const [ key, property ] of Object.entries(properties) as [string, EntityPropertyLifecycle<E, unknown>][]) {
+                if (property.required) {
+                    if (!(key in target)) {
+                        throwError(`${JSON.stringify(target)} ${key} is required`, handler)
+                    }
 
-          if (false === property.validator?.(target[key], entity)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
+                    if (false === property.validator?.(target[key], entity)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+                else if (key in target && 'undefined' !== typeof target[key]) {
+                    if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+            }
+
+            handler.created?.(entity)
+            handler.trace?.(entity)
+
+            return entity
         }
-        else if (key in target && 'undefined' !== typeof target[key]) {
-          if (guard(property, 'validator') && false === property.validator?.(target[key], entity)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
-        }
-      }
-
-      handler.created?.(entity)
-      handler.trace?.(entity)
-
-      return entity
     }
-  }
 
-  throwError(`${JSON.stringify(target)} is invalid`, handler)
+    throwError(`${JSON.stringify(target)} is invalid`, handler)
 }

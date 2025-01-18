@@ -39,7 +39,6 @@ import {
     EntityLifecycle,
     defineEntity,
 } from '@/Entity'
-
 import {
     EventTopics,
     EventObservable,

@@ -31,20 +31,20 @@
  */
 
 import {
-  it,
-  expect,
-  expectTypeOf,
-  describe,
+    guard,
+} from '@cosmicmind/foundationjs'
+import {
+    it,
+    expect,
+    expectTypeOf,
+    describe,
 } from 'vitest'
 
-import {
-  guard,
-} from '@cosmicmind/foundationjs'
 
 import {
-  Event,
-  EventError,
-  defineEvent,
+    Event,
+    EventError,
+    defineEvent,
 } from '@/index'
 
 type User = Event & {
@@ -55,143 +55,143 @@ type User = Event & {
 }
 
 const makeUser = defineEvent<User>({
-  properties: {
-    id: {
-      required: true,
-      validator: value => 2 < value.length,
-    },
-
-    createdAt: {
-      required: true,
-      validator: value => guard(value),
-    },
-
-    name: {
-      required: true,
-      validator: value => 2 < value.length,
-    },
-
-    empty: {
-      required: false,
-      validator: value => guard(value),
-    },
-  },
-})
-
-describe('Event', () => {
-  it('interface', () => {
-    const id = '123'
-    const createdAt = new Date()
-    const name = 'daniel'
-
-    const e1 = makeUser({
-      id,
-      createdAt,
-      name,
-    })
-
-    expect(e1.id).toBe(id)
-    expect(e1.createdAt).toBe(createdAt)
-    expect(e1.name).toBe(name)
-  })
-
-  it('immutable properties', () => {
-    const id = '123'
-    const createdAt = new Date()
-    const name = 'daniel'
-
-    const e1 = makeUser({
-      id,
-      createdAt,
-      name,
-    })
-
-    try {
-      e1.name = ''
-      expect(true).toBeFalsy()
-    }
-    catch (error) {
-      if (error instanceof EventError) {
-        expect(error.name).toBe('EventError')
-        expectTypeOf(error.message).toMatchTypeOf<string>()
-      }
-      else {
-        expect(true).toBeFalsy()
-      }
-    }
-
-    expect(e1.id).toBe(id)
-    expect(e1.createdAt).toBe(createdAt)
-    expect(name).toBe(e1.name)
-  })
-
-  it('undefined properties', () => {
-    const id = '123'
-    const createdAt = new Date()
-    const name = 'daniel'
-    const empty = undefined
-
-    const e1 = makeUser({
-      id,
-      createdAt,
-      name,
-      empty,
-    })
-
-    expect(e1.id).toBe(id)
-    expect(e1.createdAt).toBe(createdAt)
-    expect(name).toBe(e1.name)
-    expect(empty).toBe(undefined)
-  })
-
-  it('EventLifecycle', () => {
-    const id = '123'
-    const createdAt = new Date()
-    const name = 'daniel'
-
-    const createEvent = defineEvent<User>({
-      created(event) {
-        expect(guard(event))
-      },
-
-      properties: {
+    properties: {
         id: {
-          required: true,
-          validator: (value, event) => {
-            expect(value).toBe(id)
-            expect(event.id).toBe(id)
-            return 2 < value.length
-          },
+            required: true,
+            validator: value => 2 < value.length,
         },
 
         createdAt: {
-          required: true,
-          validator: (value, event) => {
-            expect(value).toBe(createdAt)
-            expect(event.createdAt).toBe(createdAt)
-            return guard(value)
-          },
+            required: true,
+            validator: value => guard(value),
         },
 
         name: {
-          required: true,
-          validator: (value, event) => {
-            expect(2 < value.length).toBeTruthy()
-            expect(2 < event.name.length).toBeTruthy()
-            return 2 < value.length
-          },
+            required: true,
+            validator: value => 2 < value.length,
         },
-      },
+
+        empty: {
+            required: false,
+            validator: value => guard(value),
+        },
+    },
+})
+
+describe('Event', () => {
+    it('interface', () => {
+        const id = '123'
+        const createdAt = new Date()
+        const name = 'daniel'
+
+        const e1 = makeUser({
+            id,
+            createdAt,
+            name,
+        })
+
+        expect(e1.id).toBe(id)
+        expect(e1.createdAt).toBe(createdAt)
+        expect(e1.name).toBe(name)
     })
 
-    const e1 = createEvent({
-      id,
-      createdAt,
-      name,
+    it('immutable properties', () => {
+        const id = '123'
+        const createdAt = new Date()
+        const name = 'daniel'
+
+        const e1 = makeUser({
+            id,
+            createdAt,
+            name,
+        })
+
+        try {
+            e1.name = ''
+            expect(true).toBeFalsy()
+        }
+        catch (error) {
+            if (error instanceof EventError) {
+                expect(error.name).toBe('EventError')
+                expectTypeOf(error.message).toMatchTypeOf<string>()
+            }
+            else {
+                expect(true).toBeFalsy()
+            }
+        }
+
+        expect(e1.id).toBe(id)
+        expect(e1.createdAt).toBe(createdAt)
+        expect(name).toBe(e1.name)
     })
 
-    expect(e1.id).toBe(id)
-    expect(e1.createdAt).toBe(createdAt)
-    expect(e1.name).toBe(e1.name)
-  })
+    it('undefined properties', () => {
+        const id = '123'
+        const createdAt = new Date()
+        const name = 'daniel'
+        const empty = undefined
+
+        const e1 = makeUser({
+            id,
+            createdAt,
+            name,
+            empty,
+        })
+
+        expect(e1.id).toBe(id)
+        expect(e1.createdAt).toBe(createdAt)
+        expect(name).toBe(e1.name)
+        expect(empty).toBe(undefined)
+    })
+
+    it('EventLifecycle', () => {
+        const id = '123'
+        const createdAt = new Date()
+        const name = 'daniel'
+
+        const createEvent = defineEvent<User>({
+            created(event) {
+                expect(guard(event))
+            },
+
+            properties: {
+                id: {
+                    required: true,
+                    validator: (value, event) => {
+                        expect(value).toBe(id)
+                        expect(event.id).toBe(id)
+                        return 2 < value.length
+                    },
+                },
+
+                createdAt: {
+                    required: true,
+                    validator: (value, event) => {
+                        expect(value).toBe(createdAt)
+                        expect(event.createdAt).toBe(createdAt)
+                        return guard(value)
+                    },
+                },
+
+                name: {
+                    required: true,
+                    validator: (value, event) => {
+                        expect(2 < value.length).toBeTruthy()
+                        expect(2 < event.name.length).toBeTruthy()
+                        return 2 < value.length
+                    },
+                },
+            },
+        })
+
+        const e1 = createEvent({
+            id,
+            createdAt,
+            name,
+        })
+
+        expect(e1.id).toBe(id)
+        expect(e1.createdAt).toBe(createdAt)
+        expect(e1.name).toBe(e1.name)
+    })
 })

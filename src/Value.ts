@@ -35,8 +35,8 @@
  */
 
 import {
-  guard,
-  FoundationError,
+    guard,
+    FoundationError,
 } from '@cosmicmind/foundationjs'
 
 /**
@@ -45,33 +45,33 @@ import {
  * @typeparam V - The type of the value.
  */
 export abstract class Value<V> {
-  /**
+    /**
    * Represents the value of a variable.
    *
    * @description The type can be any valid JavaScript data type.
    */
-  private readonly _value: V
+    private readonly _value: V
 
-  /**
+    /**
    * Retrieves the value stored in the instance of the class.
    *
    * @returns {V} The value stored in the instance.
    */
-  get value(): V {
-    return this._value
-  }
+    get value(): V {
+        return this._value
+    }
 
-  /**
+    /**
    * Creates a new instance of the constructor.
    *
    * @template V - The type of the value to create.
    * @param {V} value - The initial value for the instance.
    */
-  constructor(value: V) {
-    this._value = 'function' === typeof this.prepare ? this.prepare(value) : value
-  }
+    constructor(value: V) {
+        this._value = 'function' === typeof this.prepare ? this.prepare(value) : value
+    }
 
-  protected prepare?(value: V): V
+    protected prepare?(value: V): V
 }
 
 /**
@@ -116,7 +116,7 @@ export type ValueLifecycle<V> = {
  * @returns {function(value: ValueTypeFor<V>): V} - A function that creates and returns the defined value.
  */
 export const defineValue = <V extends Value<ValueTypeFor<V>>>(_class: ValueConstructor<V>, handler: ValueLifecycle<V> = {}): (value: ValueTypeFor<V>) => V =>
-  (value: ValueTypeFor<V>): V => createValue(new _class(value), value, handler)
+    (value: ValueTypeFor<V>): V => createValue(new _class(value), value, handler)
 
 /**
  * Creates a proxy handler that defines behavior for setting a value.
@@ -128,14 +128,14 @@ export const defineValue = <V extends Value<ValueTypeFor<V>>>(_class: ValueConst
  * @throws {ValueError} - If the value is invalid.
  */
 function createValueHandler<V extends Value<ValueTypeFor<V>>, T extends ValueTypeFor<V> = ValueTypeFor<V>>(handler: ValueLifecycle<V>): ProxyHandler<V> {
-  return {
-    set(target: V, key: 'value', value: T): boolean | never {
-      if (false === handler.validator?.(value, target)) {
-        throw new ValueError(`${String(key)} is invalid`)
-      }
-      return Reflect.set(target, key, value)
-    },
-  }
+    return {
+        set(target: V, key: 'value', value: T): boolean | never {
+            if (false === handler.validator?.(value, target)) {
+                throw new ValueError(`${String(key)} is invalid`)
+            }
+            return Reflect.set(target, key, value)
+        },
+    }
 }
 
 /**
@@ -148,9 +148,9 @@ function createValueHandler<V extends Value<ValueTypeFor<V>>, T extends ValueTyp
  * @throws {ValueError} - The thrown error object.
  */
 function throwErrorAndTrace<V extends Value<ValueTypeFor<V>>>(message: string, handler: ValueLifecycle<V>): never {
-  const error = new ValueError(message)
-  handler.error?.(error)
-  throw error
+    const error = new ValueError(message)
+    handler.error?.(error)
+    throw error
 }
 
 /**
@@ -164,18 +164,18 @@ function throwErrorAndTrace<V extends Value<ValueTypeFor<V>>>(message: string, h
  * @throws {Error} - Throws an error if unable to create the value.
  */
 function createValue<V extends Value<ValueTypeFor<V>>>(target: V, value: ValueTypeFor<V>, handler: ValueLifecycle<V> = {}): V | never {
-  if (guard<V>(target)) {
-    const vo = new Proxy(target, createValueHandler(handler))
+    if (guard<V>(target)) {
+        const vo = new Proxy(target, createValueHandler(handler))
 
-    if (false === handler.validator?.(value, vo)) {
-      throwErrorAndTrace(`${JSON.stringify(target)} is invalid: ${JSON.stringify(value)}`, handler)
+        if (false === handler.validator?.(value, vo)) {
+            throwErrorAndTrace(`${JSON.stringify(target)} is invalid: ${JSON.stringify(value)}`, handler)
+        }
+
+        handler.created?.(vo)
+        handler.trace?.(vo)
+
+        return vo
     }
 
-    handler.created?.(vo)
-    handler.trace?.(vo)
-
-    return vo
-  }
-
-  throwErrorAndTrace(`${JSON.stringify(target)} is invalid`, handler)
+    throwErrorAndTrace(`${JSON.stringify(target)} is invalid`, handler)
 }

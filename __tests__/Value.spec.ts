@@ -31,117 +31,116 @@
  */
 
 import {
-  it,
-  expect,
-  expectTypeOf,
-  describe,
+    it,
+    expect,
+    expectTypeOf,
+    describe,
 } from 'vitest'
-
 import {
-  string,
-  ValidationError,
+    string,
+    ValidationError,
 } from 'yup'
 
 import {
-  Value,
-  ValueError,
-  defineValue,
+    Value,
+    ValueError,
+    defineValue,
 } from '@/index'
 
 class Email extends Value<string> {
-  get domainAddress(): string {
-    return this.value.split('@')[1]
-  }
+    get domainAddress(): string {
+        return this.value.split('@')[1]
+    }
 
-  protected prepare(value: string): string {
-    return value.trim().toLowerCase()
-  }
+    protected prepare(value: string): string {
+        return value.trim().toLowerCase()
+    }
 }
 
 const makeEmail = defineValue(Email, {
-  validator: (value: string): boolean =>
-    'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
+    validator: (value: string): boolean =>
+        'string' === typeof string().email('email is invalid').strict(true).validateSync(value),
 })
 
 class Version extends Value<number> {}
 
 const makeVersionValue = defineValue(Version, {
-  validator: (value: number): boolean => 0 < value,
+    validator: (value: number): boolean => 0 < value,
 })
 
 describe('Value', () => {
-  it('create value', () => {
-    const email = 'ME@domain.com'
-    const vo = makeEmail(email)
-    expect(vo.value).not.toBe(email)
-    expect(vo.value).toBe(email.toLowerCase())
-  })
-
-  it('ValueError', () => {
-    try {
-      makeVersionValue(0)
-      expect(true).toBeFalsy()
-    }
-    catch (error) {
-      if (error instanceof ValueError) {
-        expect(error.name, 'ValueError')
-        expectTypeOf(error.message).toMatchTypeOf<string>()
-      }
-      else {
-        expect(true).toBeFalsy()
-      }
-    }
-  })
-
-  it('ValidationError', () => {
-    try {
-      makeEmail('123')
-      expect(true).toBeFalsy()
-    }
-    catch (error) {
-      if (error instanceof ValidationError) {
-        expect(error.name, 'ValidationError')
-        expectTypeOf(error.message).toMatchTypeOf<string>()
-      }
-      else {
-        expect(true).toBeFalsy()
-      }
-    }
-  })
-
-  it('get computed value', () => {
-    const email1 = 'me@domain.com'
-    const vo1 = makeEmail(email1)
-
-    const email2 = 'you@domain.com'
-    const vo2 = makeEmail(email2)
-
-    expect(vo1.value).toBe(email1)
-    expect(vo2.value).toBe(email2)
-    expect(vo1.domainAddress).toBe(vo2.domainAddress)
-  })
-
-  it('ValueLifecycle', () => {
-    const email = 'me@domain.com'
-
-    const createValue = defineValue(Email, {
-      trace(vo: Email): void {
-        expect(email).toBe(vo.value)
-      },
-
-      validator(value: string, vo: Email): boolean {
-        expect(email).toBe(value)
-        expect(email).toBe(vo.value)
-        return 'string' === typeof string().email('email is invalid').strict(true).validateSync(value)
-      },
-
-      created(vo: Email): void {
-        expect(email).toBe(vo.value)
-      },
+    it('create value', () => {
+        const email = 'ME@domain.com'
+        const vo = makeEmail(email)
+        expect(vo.value).not.toBe(email)
+        expect(vo.value).toBe(email.toLowerCase())
     })
 
-    const vo = createValue(email)
-    expect(vo.value).toBe(email)
-    expect(vo.domainAddress).toBe(email.split('@')[1])
-  })
+    it('ValueError', () => {
+        try {
+            makeVersionValue(0)
+            expect(true).toBeFalsy()
+        }
+        catch (error) {
+            if (error instanceof ValueError) {
+                expect(error.name, 'ValueError')
+                expectTypeOf(error.message).toMatchTypeOf<string>()
+            }
+            else {
+                expect(true).toBeFalsy()
+            }
+        }
+    })
+
+    it('ValidationError', () => {
+        try {
+            makeEmail('123')
+            expect(true).toBeFalsy()
+        }
+        catch (error) {
+            if (error instanceof ValidationError) {
+                expect(error.name, 'ValidationError')
+                expectTypeOf(error.message).toMatchTypeOf<string>()
+            }
+            else {
+                expect(true).toBeFalsy()
+            }
+        }
+    })
+
+    it('get computed value', () => {
+        const email1 = 'me@domain.com'
+        const vo1 = makeEmail(email1)
+
+        const email2 = 'you@domain.com'
+        const vo2 = makeEmail(email2)
+
+        expect(vo1.value).toBe(email1)
+        expect(vo2.value).toBe(email2)
+        expect(vo1.domainAddress).toBe(vo2.domainAddress)
+    })
+
+    it('ValueLifecycle', () => {
+        const email = 'me@domain.com'
+
+        const createValue = defineValue(Email, {
+            trace(vo: Email): void {
+                expect(email).toBe(vo.value)
+            },
+
+            validator(value: string, vo: Email): boolean {
+                expect(email).toBe(value)
+                expect(email).toBe(vo.value)
+                return 'string' === typeof string().email('email is invalid').strict(true).validateSync(value)
+            },
+
+            created(vo: Email): void {
+                expect(email).toBe(vo.value)
+            },
+        })
+
+        const vo = createValue(email)
+        expect(vo.value).toBe(email)
+        expect(vo.domainAddress).toBe(email.split('@')[1])
+    })
 })

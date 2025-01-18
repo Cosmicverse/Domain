@@ -33,12 +33,12 @@
 /// <reference types="vitest" />
 
 import {
-  URL,
-  fileURLToPath,
+    URL,
+    fileURLToPath,
 } from 'node:url'
 
 import {
-  defineConfig,
+    defineConfig,
 } from 'vite'
 
 const srcDir = 'src'
@@ -47,23 +47,23 @@ const testsDir = '__tests__'
 const benchmarksDir = '__benchmarks__'
 
 const alias = {
-  '@': fileURLToPath(new URL(srcDir, import.meta.url)),
+    '@': fileURLToPath(new URL(srcDir, import.meta.url)),
 }
 
 export default defineConfig({
-  resolve: {
-    alias,
-  },
-  test: {
-    include: [ `${testsDir}/**/*.spec.ts` ],
-    benchmark: {
-      include: [ `${benchmarksDir}/**/*.bench.ts` ],
-      outputFile: `${distDir}/benchmarks.json`,
+    resolve: {
+        alias,
     },
-    coverage: {
-      provider: 'v8',
-      include: [ `**/${srcDir}/**` ],
-      extension: [ '.ts' ],
+    test: {
+        include: [ `${testsDir}/**/*.spec.ts` ],
+        benchmark: {
+            include: [ `${benchmarksDir}/**/*.bench.ts` ],
+            outputFile: `${distDir}/benchmarks.json`,
+        },
+        coverage: {
+            provider: 'v8',
+            include: [ `**/${srcDir}/**` ],
+            extension: [ '.ts' ],
+        },
     },
-  },
 })

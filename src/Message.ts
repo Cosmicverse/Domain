@@ -35,13 +35,13 @@
  */
 
 import {
-  guard,
-  FoundationError,
+    guard,
+    FoundationError,
 } from '@cosmicmind/foundationjs'
 
 import {
-  Observable,
-  ObservableTopics,
+    Observable,
+    ObservableTopics,
 } from '@/Topic'
 
 /**
@@ -111,7 +111,7 @@ export type MessageLifecycle<E extends Message> = {
  * @returns {(message: E) => E} - A function that creates and processes the message.
  */
 export const defineMessage = <E extends Message>(handler: MessageLifecycle<E> = {}): (message: E) => E =>
-  (message: E): E => makeMessage(message, handler)
+    (message: E): E => makeMessage(message, handler)
 
 /**
  * Creates a proxy handler to be used as a message handler.
@@ -121,11 +121,11 @@ export const defineMessage = <E extends Message>(handler: MessageLifecycle<E> = 
  * @returns {ProxyHandler<E>} - The proxy handler for the message.
  */
 function makeMessageHandler<E extends Message>(handler: MessageLifecycle<E>): ProxyHandler<E> {
-  return {
-    set(): never {
-      throwError('cannot modify message properties', handler)
-    },
-  }
+    return {
+        set(): never {
+            throwError('cannot modify message properties', handler)
+        },
+    }
 }
 
 /**
@@ -138,9 +138,9 @@ function makeMessageHandler<E extends Message>(handler: MessageLifecycle<E>): Pr
  * @throws {MessageError} - The thrown error.
  */
 function throwError<E extends Message>(message: string, handler: MessageLifecycle<E>): never {
-  const error = new MessageError(message)
-  handler.error?.(error)
-  throw error
+    const error = new MessageError(message)
+    handler.error?.(error)
+    throw error
 }
 
 /**
@@ -153,34 +153,34 @@ function throwError<E extends Message>(message: string, handler: MessageLifecycl
  * @throws {MessageError} - If the target is invalid.
  */
 function makeMessage<E extends Message>(target: E, handler: MessageLifecycle<E> = {}): E | never {
-  if (guard<E>(target)) {
-    const properties = handler.properties
+    if (guard<E>(target)) {
+        const properties = handler.properties
 
-    if (guard<MessagePropertyLifecycleMap<E>>(properties)) {
-      const message = new Proxy(target, makeMessageHandler(handler))
+        if (guard<MessagePropertyLifecycleMap<E>>(properties)) {
+            const message = new Proxy(target, makeMessageHandler(handler))
 
-      for (const [ key, property ] of Object.entries(properties) as [string, MessagePropertyLifecycle<E, unknown>][]) {
-        if (property.required) {
-          if (!(key in target)) {
-            throwError(`${JSON.stringify(target)} ${key} is required`, handler)
-          }
+            for (const [ key, property ] of Object.entries(properties) as [string, MessagePropertyLifecycle<E, unknown>][]) {
+                if (property.required) {
+                    if (!(key in target)) {
+                        throwError(`${JSON.stringify(target)} ${key} is required`, handler)
+                    }
 
-          if (false === property.validator?.(target[key], message)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
+                    if (false === property.validator?.(target[key], message)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+                else if (key in target && 'undefined' !== typeof target[key]) {
+                    if (guard(property, 'validator') && false === property.validator?.(target[key], message)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+            }
+
+            handler.created?.(message)
+
+            return message
         }
-        else if (key in target && 'undefined' !== typeof target[key]) {
-          if (guard(property, 'validator') && false === property.validator?.(target[key], message)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
-        }
-      }
-
-      handler.created?.(message)
-
-      return message
     }
-  }
 
-  throw new MessageError(`${String(target)} is invalid`)
+    throw new MessageError(`${String(target)} is invalid`)
 }

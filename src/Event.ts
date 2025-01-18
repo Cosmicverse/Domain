@@ -35,13 +35,13 @@
  */
 
 import {
-  guard,
-  FoundationError,
+    guard,
+    FoundationError,
 } from '@cosmicmind/foundationjs'
 
 import {
-  Observable,
-  ObservableTopics,
+    Observable,
+    ObservableTopics,
 } from '@/Topic'
 
 /**
@@ -123,7 +123,7 @@ export type EventLifecycle<E extends Event> = {
  * @template E - The type of event.
  */
 export const defineEvent = <E extends Event>(handler: EventLifecycle<E> = {}): (event: E) => E =>
-  (event: E): E => makeEvent(event, handler)
+    (event: E): E => makeEvent(event, handler)
 
 /**
  * Creates a proxy handler for event objects that disallows modification of event properties.
@@ -133,11 +133,11 @@ export const defineEvent = <E extends Event>(handler: EventLifecycle<E> = {}): (
  * @returns {ProxyHandler<E>} - The proxy handler for the event object.
  */
 function makeEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHandler<E> {
-  return {
-    set(): never {
-      throwError('cannot modify event properties', handler)
-    },
-  }
+    return {
+        set(): never {
+            throwError('cannot modify event properties', handler)
+        },
+    }
 }
 
 /**
@@ -149,9 +149,9 @@ function makeEventHandler<E extends Event>(handler: EventLifecycle<E>): ProxyHan
  * @returns {never} - This method never returns as it always throws an error.
  */
 function throwError<E extends Event>(event: string, handler: EventLifecycle<E>): never {
-  const error = new EventError(event)
-  handler.error?.(error)
-  throw error
+    const error = new EventError(event)
+    handler.error?.(error)
+    throw error
 }
 
 /**
@@ -164,34 +164,34 @@ function throwError<E extends Event>(event: string, handler: EventLifecycle<E>):
  * @returns {E | never} - The created event object with applied lifecycle handlers and validators.
  */
 function makeEvent<E extends Event>(target: E, handler: EventLifecycle<E> = {}): E | never {
-  if (guard<E>(target)) {
-    const properties = handler.properties
+    if (guard<E>(target)) {
+        const properties = handler.properties
 
-    if (guard<EventPropertyLifecycleMap<E>>(properties)) {
-      const event = new Proxy(target, makeEventHandler(handler))
+        if (guard<EventPropertyLifecycleMap<E>>(properties)) {
+            const event = new Proxy(target, makeEventHandler(handler))
 
-      for (const [ key, property ] of Object.entries(properties) as [string, EventPropertyLifecycle<E, unknown>][]) {
-        if (property.required) {
-          if (!(key in target)) {
-            throwError(`${JSON.stringify(target)} ${key} is required`, handler)
-          }
+            for (const [ key, property ] of Object.entries(properties) as [string, EventPropertyLifecycle<E, unknown>][]) {
+                if (property.required) {
+                    if (!(key in target)) {
+                        throwError(`${JSON.stringify(target)} ${key} is required`, handler)
+                    }
 
-          if (false === property.validator?.(target[key], event)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
+                    if (false === property.validator?.(target[key], event)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+                else if (key in target && 'undefined' !== typeof target[key]) {
+                    if (guard(property, 'validator') && false === property.validator?.(target[key], event)) {
+                        throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
+                    }
+                }
+            }
+
+            handler.created?.(event)
+
+            return event
         }
-        else if (key in target && 'undefined' !== typeof target[key]) {
-          if (guard(property, 'validator') && false === property.validator?.(target[key], event)) {
-            throwError(`${JSON.stringify(target)} ${key} is invalid`, handler)
-          }
-        }
-      }
-
-      handler.created?.(event)
-
-      return event
     }
-  }
 
-  throw new EventError(`${String(target)} is invalid`)
+    throw new EventError(`${String(target)} is invalid`)
 }
