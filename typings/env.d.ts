@@ -1,4 +1,4 @@
-/* Copyright © 2025, CosmicMind, Inc. <http://cosmicmind.com>. All rights reserved. */
+/* Copyright © 2025, CosmicMind, Inc. */
 
 /// <reference types="vite/client" />
 

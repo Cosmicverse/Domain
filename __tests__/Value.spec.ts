@@ -1,7 +1,7 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright © 2024, Daniel Jonathan <daniel at cosmicmind dot com>
+ * Copyright © 2025, CosmicMind, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
